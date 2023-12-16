@@ -9,7 +9,7 @@ export function Home() {
   return (
     <main className={styles.main}>
       <div className={styles.title}>
-        <text>Game Master | To GM'S by GM</text>
+        <text>Game Master | To GM by GM</text>
       </div>
 
         <div className={styles.group}>
