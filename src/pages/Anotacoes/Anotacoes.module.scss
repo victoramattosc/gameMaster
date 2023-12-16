@@ -1,0 +1,64 @@
+.title{
+    color: #FFF;
+}
+
+.all{
+    padding: 30px;
+}
+
+.input{
+    width: 28vw;
+    background-color: #FFF;
+    border: none;
+    text-decoration: none;
+}:focus{
+    outline: none;
+}
+
+.inputdiv{
+    background-color: #FFF;
+    border: 1px solid #65b8a6;
+    border-radius: 25vw;
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+}
+
+.container{
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.anotacao{
+    display: flex;
+    width: 20vw;
+    justify-content: space-between;
+    flex-direction: row;
+    align-items: center;
+    background-color: #FFF;//#cfeceb
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 12px;
+}
+
+.botao{
+    border: none; /* Remove a borda */
+    background-color: #FFF; /* Cor de fundo (substitua pela cor desejada) */
+    cursor: pointer; /* Mude o cursor para indicar que é clicável */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.botaotrash{
+    border: 1px solid red;
+    border-radius: 100%;
+    height: 1.5vw;
+    width: 1.5vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
