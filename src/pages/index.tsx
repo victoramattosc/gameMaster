@@ -3,22 +3,23 @@ import { Dados } from "./Dados";
 import { Anotacoes } from "./Anotacoes";
 import { Vida } from "./Vida";
 
-import icon from '../assets/GM.png';
+import icon from "../assets/GM.png";
 
 import styles from "./Home.module.scss";
 
 export function Home() {
-  <link rel="icon" href="../assets/GM.png" />
+  <link rel="icon" href="../assets/GM.png" />;
 
   return (
     <main className={styles.main}>
-      <div className={styles.imagem}>
-      <img src={icon} alt="icon" className={styles.icon}/>
-      </div>
       <div className={styles.title}>
         <text>Game Master | To GM by GM</text>
       </div>
 
+      <div className={styles.content}>
+        <div className={styles.imagem}>
+          <img src={icon} alt="icon" className={styles.icon} />
+        </div>
         <div className={styles.group}>
           {/*Iniciativa*/}
           <div className={styles.iniciativa}>
@@ -42,6 +43,7 @@ export function Home() {
             <Vida />
           </div>
         </div>
+      </div>
     </main>
   );
 }
