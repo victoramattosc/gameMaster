@@ -17,9 +17,6 @@ export function Home() {
       </div>
 
       <div className={styles.content}>
-        <div className={styles.imagem}>
-          <img src={icon} alt="icon" className={styles.icon} />
-        </div>
         <div className={styles.group}>
           {/*Iniciativa*/}
           <div className={styles.iniciativa}>
@@ -30,6 +27,10 @@ export function Home() {
           <div className={styles.dados}>
             <Dados />
           </div>
+        </div>
+
+        <div className={styles.imagem}>
+          <img src={icon} alt="icon" className={styles.icon} />
         </div>
 
         <div className={styles.group}>
