@@ -44,7 +44,7 @@ export function Iniciativa() {
             <FiPlusCircle color="#65b8a6" size={"20px"} />
           </button>
         </div>
-        <ul className={styles.margin}>
+        <ul className={styles.anotacaoList}>
           {jogadores.map((jogador: any, index: any) => (
             <li key={index} className={styles.ordem}>
               {jogador}

@@ -71,12 +71,9 @@
     padding: 20px;
     border-radius: 15px;
     margin-bottom: 12px;
+    margin-right: 6px;
 }
 
-.margin{
-    margin-top: 12px;
-
-}
 
 .container{
     padding: 20px;
@@ -110,3 +107,24 @@
 .text{
     font-size: 16px;
 }
+
+.anotacaoList {
+    list-style-type: none;
+    max-height: 250px; // Defina a altura máxima desejada
+    overflow-y: auto; // Adiciona uma barra de rolagem vertical quando necessário
+    padding: 0;
+    margin: 0; 
+
+    &::-webkit-scrollbar {
+        width: 6px; // Largura da barra de rolagem
+      }
+    
+      &::-webkit-scrollbar-thumb {
+        background-color: #2d6073; // Cor da barra de rolagem
+        border-radius: 10px; // Borda arredondada da barra de rolagem
+      }
+    
+      &::-webkit-scrollbar-track {
+        background-color: #1f192f // Cor de fundo da área de rastreamento
+      }
+  }

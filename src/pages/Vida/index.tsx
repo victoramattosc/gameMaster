@@ -38,7 +38,7 @@ export function Vida() {
     <div className={styles.all}>
       <h2 className={styles.title}>Personagens e Criaturas</h2>
       <div className={styles.container}>
-        <ul className={styles.margin}>
+        <ul className={styles.anotacaoList}>
           {characters.map((character: any, index: any) => (
             <li key={index} className={styles.personagens}>
               <span>{character.name}</span>
