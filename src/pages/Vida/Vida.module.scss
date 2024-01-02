@@ -21,12 +21,34 @@
 }
 
 .botao{
+    border: 1px solid #65b8a6;
+    border-radius: 5px;
+    background-color: #FFF; /* Cor de fundo (substitua pela cor desejada) */
+    cursor: pointer; /* Mude o cursor para indicar que é clicável */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2vw;
+}
+
+
+.botaoAdd{
     border: none; /* Remove a borda */
     background-color: #FFF; /* Cor de fundo (substitua pela cor desejada) */
     cursor: pointer; /* Mude o cursor para indicar que é clicável */
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.botaoFi{
+    border: none; /* Remove a borda */
+    background-color: #FFF; /* Cor de fundo (substitua pela cor desejada) */
+    cursor: pointer; /* Mude o cursor para indicar que é clicável */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px;
 }
 
 .botaotrash{
@@ -61,4 +83,30 @@
     display: flex;
     align-items: center;
     flex-direction: column;
+}
+
+.buttonRow{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.buttonRowTwo{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px
+}
+
+.buttonColumn{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.text{
+    font-size: 16px;
 }

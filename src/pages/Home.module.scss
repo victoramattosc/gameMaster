@@ -8,22 +8,19 @@
 .content{
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .icon{
   height: 5vw;
-  width: 5vw;
+  max-width: 100%;
 }
 
 
 
 .imagem{
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: absolute;
-  z-index: 1;
-  top: 53.8%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
