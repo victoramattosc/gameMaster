@@ -1,23 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./Anotacoes.module.scss";
 import { FiTrash2, FiPlusCircle } from "react-icons/fi";
 
-
 export function Anotacoes() {
-  const [anotacao, setAnotacao]: any = useState([]);
-  const [novaAnotacao, setNovaAnotacao]: any = useState("");
+  const [anotacoes, setAnotacoes] = useState<string[]>([]);
+  const [novaAnotacao, setNovaAnotacao] = useState("");
+
+  // Função para carregar as anotações salvas nos cookies ao carregar a página
+  useEffect(() => {
+    const savedAnotacoes = localStorage.getItem("anotacoes");
+    if (savedAnotacoes) {
+      setAnotacoes(JSON.parse(savedAnotacoes));
+    }
+  }, []);
 
   const adicionarAnotacao = () => {
     if (novaAnotacao.trim() !== "") {
-      setAnotacao([...anotacao, novaAnotacao]);
+      const updatedAnotacoes = [...anotacoes, novaAnotacao];
+      setAnotacoes(updatedAnotacoes);
+      localStorage.setItem("anotacoes", JSON.stringify(updatedAnotacoes));
       setNovaAnotacao("");
     }
   };
 
-  const removerAnotacao = (index: any) => {
-    const novaOrdem = [...anotacao];
-    novaOrdem.splice(index, 1);
-    setAnotacao(novaOrdem);
+  const removerAnotacao = (index: number) => {
+    const updatedAnotacoes = anotacoes.filter((_, i) => i !== index);
+    setAnotacoes(updatedAnotacoes);
+    localStorage.setItem("anotacoes", JSON.stringify(updatedAnotacoes));
   };
 
   return (
@@ -25,9 +34,9 @@ export function Anotacoes() {
       <h2 className={styles.title}>Anotações</h2>
       <div className={styles.container}>
         <ul className={styles.anotacaoList}>
-          {anotacao.map((jogador: any, index: any) => (
+          {anotacoes.map((anotacao, index) => (
             <li key={index} className={styles.anotacao}>
-              {jogador}
+              {anotacao}
               <button
                 onClick={() => removerAnotacao(index)}
                 className={styles.botaotrash}

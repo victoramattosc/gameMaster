@@ -8,6 +8,7 @@ import icon from "../assets/GM.png";
 import styles from "./Home.module.scss";
 
 export function Home() {
+
   <link rel="icon" href="../assets/GM.png" />;
 
   return (

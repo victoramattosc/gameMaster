@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./Iniciativa.module.scss";
 import { FiTrash2, FiPlusCircle, FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 export function Iniciativa() {
-  const [jogadores, setJogadores]: any = useState([]);
-  const [novoJogador, setNovoJogador]: any = useState("");
+  const [jogadores, setJogadores] = useState<string[]>(getJogadoresFromCookies() || []);
+  const [novoJogador, setNovoJogador] = useState("");
 
   const adicionarJogador = () => {
     if (novoJogador.trim() !== "") {
@@ -13,19 +13,23 @@ export function Iniciativa() {
     }
   };
 
-  const removerJogador = (index: any) => {
+  const removerJogador = (index: number) => {
     const novaOrdem = [...jogadores];
     novaOrdem.splice(index, 1);
     setJogadores(novaOrdem);
   };
 
-  const moverJogador = (index: any, direcao: any) => {
+  const moverJogador = (index: number, direcao: "up" | "down") => {
     const novaOrdem = [...jogadores];
     const jogadorMovido = novaOrdem.splice(index, 1)[0];
     const newIndex = direcao === "up" ? index - 1 : index + 1;
     novaOrdem.splice(newIndex, 0, jogadorMovido);
     setJogadores(novaOrdem);
   };
+
+  useEffect(() => {
+    saveJogadoresToCookies(jogadores);
+  }, [jogadores]);
 
   return (
     <div>
@@ -45,7 +49,7 @@ export function Iniciativa() {
           </button>
         </div>
         <ul className={styles.anotacaoList}>
-          {jogadores.map((jogador: any, index: any) => (
+          {jogadores.map((jogador: string, index: number) => (
             <li key={index} className={styles.ordem}>
               {jogador}
               <button onClick={() => moverJogador(index, "up")} className={styles.botao}>
@@ -66,4 +70,15 @@ export function Iniciativa() {
       </div>
     </div>
   );
+}
+
+// Função para obter os jogadores do cookie
+function getJogadoresFromCookies() {
+  const jogadoresString = localStorage.getItem("jogadores");
+  return jogadoresString ? JSON.parse(jogadoresString) : [];
+}
+
+// Função para salvar os jogadores no cookie
+function saveJogadoresToCookies(jogadores: string[]) {
+  localStorage.setItem("jogadores", JSON.stringify(jogadores));
 }
