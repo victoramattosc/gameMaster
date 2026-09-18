@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Oswald&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Kalam:wght@400;700&display=swap');
 
 
 html, body, div, span, applet, object, iframe,
@@ -46,10 +46,45 @@ table {
 }
 
 body {
-  background-color: #f6f6f6;
+  background-color: #1f192f;
 }
 
 * {
   box-sizing: border-box;
   font-family: 'Oswald', sans-serif;
+}
+
+a { color: #65b8a6; }
+a:hover { color: #8fd0c1; }
+
+.gm-btn { transition: filter 0.1s ease, transform 0.1s ease; }
+.gm-btn:hover { filter: brightness(1.12); }
+.gm-btn:active { transform: scale(0.94); }
+.gm-tab:hover { background: rgba(212, 162, 76, 0.12); }
+
+.gm-scroll::-webkit-scrollbar { width: 6px; }
+.gm-scroll::-webkit-scrollbar-thumb { background-color: #2d6073; border-radius: 10px; }
+.gm-scroll::-webkit-scrollbar-track { background-color: transparent; }
+
+.gm-scroll-x { scrollbar-width: thin; scrollbar-color: #d4a24c rgba(0, 0, 0, 0.25); }
+.gm-scroll-x::-webkit-scrollbar { height: 5px; }
+.gm-scroll-x::-webkit-scrollbar-thumb { background-color: #d4a24c; border-radius: 10px; }
+.gm-scroll-x::-webkit-scrollbar-track { background-color: rgba(0, 0, 0, 0.25); border-radius: 10px; }
+
+@keyframes gm-dice-spin {
+  0% { transform: rotate(0deg) scale(1); }
+  60% { transform: rotate(380deg) scale(1.15); }
+  100% { transform: rotate(720deg) scale(1); }
+}
+@keyframes gm-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 162, 76, 0.55); }
+  50% { box-shadow: 0 0 0 7px rgba(212, 162, 76, 0); }
+}
+@keyframes gm-pop {
+  from { opacity: 0; transform: scale(0.9) translateY(-6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes gm-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

@@ -1,0 +1,192 @@
+@use "../../../styles/tokens" as t;
+@use "../../../styles/mixins" as m;
+
+.uploader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 2px dashed t.$color-teal;
+  border-radius: t.$radius-lg;
+  min-height: 340px;
+  height: 100%;
+  color: t.$color-text-muted;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.swapBtn {
+  background: #fff;
+  border: 1px solid t.$color-mint;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: t.$color-ink;
+  cursor: pointer;
+  flex: none;
+}
+
+.select {
+  background: #fff;
+  border: 1px solid t.$color-mint;
+  border-radius: t.$radius-sm;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: t.$font-ui;
+  color: t.$color-ink;
+}
+
+.tinyInput {
+  border: 1px solid t.$color-mint;
+  border-radius: t.$radius-sm;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-family: t.$font-ui;
+  flex: 1;
+  min-width: 80px;
+}
+
+.colorInput {
+  @include m.color-swatch-input(t.$color-mint);
+  width: 28px;
+  height: 28px;
+  border-radius: t.$radius-sm;
+  flex: none;
+}
+
+.placingBtn {
+  background: #fff;
+  color: t.$color-ink;
+  border: 1px solid t.$color-gold;
+  border-radius: t.$radius-sm;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.placingActive {
+  background: t.$color-gold;
+  animation: gm-pulse 1.2s infinite;
+}
+
+.mapViewport {
+  position: relative;
+  margin-top: 14px;
+  min-height: 380px;
+  height: 100%;
+  border-radius: t.$radius-md;
+  overflow: hidden;
+  border: 1px solid t.$color-teal;
+  touch-action: none;
+}
+
+.mapCanvas {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.08s linear;
+  will-change: transform;
+}
+
+.zoomControls {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(31, 25, 47, 0.72);
+  border: 1px solid t.$color-teal;
+  border-radius: t.$radius-pill;
+  padding: 5px 6px;
+  backdrop-filter: blur(2px);
+}
+
+.zoomBtn {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: t.$color-text;
+  cursor: pointer;
+  flex: none;
+  transition: filter 0.1s ease, transform 0.1s ease, opacity 0.1s ease;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.2);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.92);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}
+
+.zoomValue {
+  font-size: 11px;
+  color: t.$color-text-muted;
+  min-width: 32px;
+  text-align: center;
+  user-select: none;
+}
+
+.pointer {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #fff;
+  border-radius: t.$radius-pill;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: grab;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+  touch-action: none;
+}
+
+.pointerLabel {
+  pointer-events: none;
+}
+
+.pointerRemove {
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  color: #fff;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  font-size: 10px;
+  cursor: pointer;
+  line-height: 1;
+  flex: none;
+  padding: 0;
+}

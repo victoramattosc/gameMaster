@@ -1,0 +1,67 @@
+@use "../../../styles/tokens" as t;
+
+.card {
+  background: linear-gradient(160deg, t.$color-panel-from, t.$color-panel-to);
+  border: 1px solid t.$color-teal;
+  border-radius: t.$radius-lg;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: t.$color-text;
+  min-width: 0;
+  min-height: 0;
+  box-shadow: t.$shadow-card;
+  position: relative;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 14px;
+  border-bottom: 1px solid t.$color-teal;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  user-select: none;
+  background: rgba(0, 0, 0, 0.15);
+  touch-action: none;
+}
+
+.grip {
+  color: t.$color-text-muted;
+  display: flex;
+}
+
+.title {
+  flex: 1;
+}
+
+.clearBtn {
+  background: transparent;
+  border: none;
+  color: t.$color-text-muted;
+  cursor: pointer;
+  display: flex;
+  flex: none;
+}
+
+.body {
+  padding: 16px;
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.resizeHandle {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  color: t.$color-teal;
+  z-index: 2;
+  touch-action: none;
+}

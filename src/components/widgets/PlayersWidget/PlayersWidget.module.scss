@@ -1,0 +1,81 @@
+@use "../../../styles/tokens" as t;
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  background: #fff;
+  color: t.$color-ink;
+  border-radius: t.$radius-md;
+  padding: 13px 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, t.$color-gold, t.$color-gold-dark);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex: none;
+}
+
+.name {
+  flex: 1;
+  font-weight: 600;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.chevronBtn {
+  background: rgba(31, 25, 47, 0.06);
+  border: none;
+  border-radius: 50%;
+  color: t.$color-teal;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.trashBtn {
+  background: transparent;
+  border: 1px solid t.$color-red-light;
+  border-radius: 50%;
+  color: t.$color-red-light;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.conditions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  align-items: center;
+}

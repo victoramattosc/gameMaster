@@ -1,0 +1,45 @@
+@use "../../../styles/tokens" as t;
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+}
+
+.solid-teal {
+  background: t.$color-teal;
+  border: none;
+  color: t.$color-text;
+}
+
+.outline-danger {
+  background: transparent;
+  border: 1px solid t.$color-red;
+  color: t.$color-red-lighter;
+}
+
+.outline-gold {
+  background: transparent;
+  border: 1px dashed t.$color-teal;
+  color: t.$color-mint;
+}
+
+.ghost {
+  background: transparent;
+  border: none;
+  color: t.$color-text-muted;
+}
+
+.ghost-danger {
+  background: transparent;
+  border: none;
+  color: t.$color-red-light;
+}
+
+.active {
+  filter: brightness(1.15);
+}

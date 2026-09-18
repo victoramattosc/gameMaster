@@ -1,0 +1,58 @@
+@use "../../../styles/tokens" as t;
+
+.banner {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 200;
+  background: t.$color-panel-alt;
+  border: 1px solid t.$color-teal;
+  border-radius: t.$radius-md;
+  padding: 14px 18px;
+  box-shadow: t.$shadow-modal;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  max-width: 640px;
+  margin: 0 auto;
+  animation: gm-pop 0.18s ease-out;
+}
+
+.text {
+  flex: 1;
+  min-width: 220px;
+  font-size: 13px;
+  color: t.$color-text-muted;
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+
+.decline {
+  background: transparent;
+  border: 1px solid t.$color-teal;
+  border-radius: t.$radius-pill;
+  padding: 8px 16px;
+  color: t.$color-text-muted;
+  font-size: 13px;
+  font-family: t.$font-ui;
+  cursor: pointer;
+}
+
+.accept {
+  background: linear-gradient(135deg, t.$color-mint, t.$color-teal);
+  border: none;
+  border-radius: t.$radius-pill;
+  padding: 8px 16px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: t.$font-ui;
+  cursor: pointer;
+}
