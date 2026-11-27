@@ -1,0 +1,246 @@
+@use "../styles/tokens" as *;
+
+.page {
+  min-height: 100vh;
+  background: $bg;
+}
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 32px;
+  background: $bg-raised;
+  border-bottom: 1px solid $line;
+  @include mobile {
+    padding: 12px 16px;
+  }
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: $text;
+  text-decoration: none;
+  font-size: 24px;
+  &:hover {
+    color: $text;
+  }
+}
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 32px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+  @include mobile {
+    padding: 20px 16px 40px;
+    gap: 26px;
+  }
+}
+.invite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: $radius-lg;
+  background: $surface-gold;
+  border: 1px solid $line-gold;
+}
+.inviteIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: $red;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.sectionHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  h2 {
+    font-size: 15px;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+}
+.gridGm {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+}
+.gridPlay {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+.lift {
+  transition: transform 0.15s, box-shadow 0.15s;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-hover;
+  }
+}
+.gmCard {
+  @extend .lift;
+  text-decoration: none;
+  color: $ink;
+  background: $paper;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  &:hover {
+    color: $ink;
+  }
+}
+.band {
+  padding: 12px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #fff7e8;
+}
+.bandStatus {
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.28);
+  padding: 4px 10px;
+  border-radius: $radius-pill;
+}
+.gmBody {
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+.stack {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid $paper;
+  color: $ink;
+  font-weight: 800;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cta {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px dashed $paper-line;
+  font-weight: 800;
+  color: $gold-ink;
+  font-size: 15px;
+}
+.newCard {
+  @extend .lift;
+  text-decoration: none;
+  min-height: 250px;
+  border-radius: $radius-lg;
+  border: 2px dashed $line-gold;
+  color: $gold;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: $bg-raised;
+  text-align: center;
+  padding: 16px;
+}
+.plus {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: $surface-gold;
+  border: 1px solid $line-gold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.playCard {
+  @extend .lift;
+  text-decoration: none;
+  color: $text;
+  background: $surface;
+  border: 1px solid $line;
+  border-radius: $radius-lg;
+  padding: 18px;
+  display: flex;
+  gap: 16px;
+  &:hover {
+    color: $text;
+  }
+}
+.portrait {
+  width: 72px;
+  height: 90px;
+  flex: none;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  box-shadow: 0 0 0 2px $bg, 0 0 0 4px $text-muted;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+.joinCard {
+  border-radius: $radius-lg;
+  border: 1px dashed $line-strong;
+  background: $bg-raised;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  > label {
+    width: 100%;
+  }
+  > button {
+    align-self: flex-start;
+  }
+}

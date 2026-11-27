@@ -1,0 +1,80 @@
+@use "../styles/tokens" as *;
+
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+.scrim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  border: none;
+  background: rgba(10, 7, 5, 0.35);
+  cursor: default;
+}
+.scrimDark {
+  background: rgba(10, 7, 5, 0.6);
+}
+.anchor {
+  position: absolute;
+  top: 76px;
+  right: 20px;
+  max-width: calc(100% - 40px);
+  max-height: calc(100vh - 96px);
+  overflow: auto;
+  border-radius: $radius-lg;
+  animation: gm-pop 0.16s ease-out;
+  @include mobile {
+    top: 64px;
+    right: 12px;
+    left: 12px;
+    max-width: none;
+    > section {
+      width: 100% !important;
+    }
+  }
+}
+.center {
+  position: absolute;
+  top: 6vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-height: 88vh;
+  overflow: auto;
+  border-radius: $radius-lg;
+  animation: gm-pop 0.16s ease-out;
+}
+
+.card {
+  max-width: 100%;
+  background: $paper;
+  color: $ink;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+}
+.cardDark {
+  background: $bg-raised;
+  color: $text;
+  box-shadow: 0 0 0 1px $line-strong, 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: $ink;
+  color: $paper;
+  > svg {
+    color: $gold;
+    flex: none;
+  }
+}
+.cardTitle {
+  flex: 1;
+  min-width: 0;
+  font: 400 21px $font-display;
+  line-height: 1.1;
+}

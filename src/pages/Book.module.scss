@@ -1,0 +1,139 @@
+@use "../styles/tokens" as *;
+
+.page {
+  min-height: 100vh;
+  background: $bg;
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  background: $bg-raised;
+  border-bottom: 1px solid $line;
+  @include mobile {
+    padding: 12px 14px;
+  }
+}
+.search {
+  flex: 1 1 260px;
+  max-width: 380px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: $surface;
+  border: 1px solid $line;
+  input {
+    flex: 1;
+    border: none !important;
+    background: transparent !important;
+    color: $text !important;
+    padding: 0 !important;
+    outline: none;
+  }
+}
+.body {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 0;
+}
+.aside {
+  flex: 1 1 260px;
+  max-width: 320px;
+  min-width: 0;
+  padding: 18px;
+  background: $bg-sunken;
+  border-right: 1px solid $line;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  @include mobile {
+    max-width: none;
+    border-right: none;
+    border-bottom: 1px solid $line;
+  }
+}
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bookBtn {
+  flex: 1;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  color: $text;
+  background: $surface;
+  border: 1px solid $line;
+  font-weight: 400;
+}
+.bookOn {
+  background: $surface-gold;
+  border-color: $line-gold;
+}
+.spine {
+  width: 10px;
+  height: 40px;
+  border-radius: 3px;
+  flex: none;
+}
+.tocBtn {
+  flex: 1;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: transparent;
+  color: $text;
+  font-weight: 700;
+  font-size: 15px;
+}
+.tocOn {
+  background: #3b2a14;
+}
+.main {
+  flex: 999 1 560px;
+  min-width: 0;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  @include mobile {
+    padding: 14px 12px 30px;
+  }
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.sep {
+  width: 1px;
+  height: 28px;
+  background: $line;
+}
+.viewer {
+  flex: 1;
+  min-height: 70vh;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fffaf0;
+  box-shadow: 0 0 0 1px #c9b48a, 0 20px 50px rgba(0, 0, 0, 0.5);
+  iframe {
+    width: 100%;
+    height: 100%;
+    min-height: 70vh;
+    border: none;
+    display: block;
+  }
+}

@@ -1,0 +1,178 @@
+@use "../styles/tokens" as *;
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  background: $bg;
+}
+.hero {
+  flex: 1 1 520px;
+  min-width: 0;
+  padding: 56px 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 40px;
+  background: $bg-raised;
+  border-right: 1px solid $line;
+  @include mobile {
+    padding: 32px 20px;
+    gap: 28px;
+    border-right: none;
+    border-bottom: 1px solid $line;
+  }
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.brandName {
+  font-size: 30px;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+.brandTag {
+  font-size: 14px;
+  color: $text-muted;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.pitch {
+  max-width: 520px;
+  h1 {
+    font-size: 54px;
+    line-height: 1.05;
+    margin-bottom: 18px;
+    @include mobile {
+      font-size: 38px;
+    }
+  }
+  p {
+    font-size: 19px;
+    line-height: 1.5;
+    color: $text-soft;
+    @include mobile {
+      font-size: 17px;
+    }
+  }
+}
+.systems {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 8px 8px;
+  border-radius: $radius-pill;
+  background: color-mix(in srgb, var(--c) 18%, #1e1713);
+  border: 1px solid color-mix(in srgb, var(--c) 55%, #1e1713);
+  font-weight: 700;
+  font-size: 15px;
+}
+.dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--c);
+}
+.pillCustom {
+  border-style: dashed;
+  .dot {
+    background: transparent;
+    border: 2px dashed $gold;
+  }
+}
+.formSide {
+  flex: 1 1 420px;
+  min-width: 0;
+  padding: 56px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  @include mobile {
+    padding: 28px 16px 40px;
+  }
+}
+.card {
+  width: 100%;
+  max-width: 440px;
+  background: $paper;
+  color: $ink;
+  border-radius: 18px;
+  padding: 36px 34px;
+  box-shadow: 0 0 0 1px #c9b48a, 0 0 0 6px #241b16, 0 0 0 7px #5a4430, 0 24px 60px rgba(0, 0, 0, 0.55);
+  @include mobile {
+    padding: 26px 20px;
+  }
+}
+.heading {
+  font-size: 32px;
+  margin-bottom: 6px;
+}
+.sub {
+  margin-bottom: 22px;
+  color: $ink-muted;
+  font-size: 16px;
+}
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  :global(.gm-in) {
+    height: 48px;
+    border-radius: 12px;
+    font-size: 16px;
+  }
+}
+.code {
+  border-style: dashed !important;
+  border-color: $gold-ink !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px;
+}
+.info {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #dfe9cf;
+  color: #33501f;
+  font-weight: 700;
+  font-size: 14px;
+}
+.inviteToggle {
+  background: none;
+  padding: 6px 0;
+  justify-content: flex-start;
+  color: $gold-ink;
+  font-size: 15px;
+  align-self: flex-start;
+}
+.foot {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px dashed $paper-line;
+  font-size: 14px;
+  color: $ink-muted;
+  line-height: 1.45;
+}
+.scan {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border-radius: 12px;
+  border: 1.5px dashed $gold-ink;
+  background: $paper-light;
+  color: $gold-ink;
+  padding: 0;
+}

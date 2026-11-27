@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<title>Você foi convidado · Game Master</title>
+</head>
+<body style="margin:0; padding:0; background:#17120f;">
+  <!-- Texto de prévia (aparece na lista da caixa de entrada) -->
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:#17120f;">
+    Tem um lugar reservado para você na mesa. Crie sua conta e monte sua ficha.
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#17120f;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
+
+          <!-- Marca -->
+          <tr>
+            <td align="center" style="padding:0 0 20px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="width:44px; height:44px; border-radius:50%; background:#241b16; border:2px solid #e0a040; text-align:center; vertical-align:middle; font-family:Georgia,'Times New Roman',serif; font-size:22px; color:#e0a040;">&#9876;</td>
+                  <td style="padding-left:12px; font-family:Georgia,'Times New Roman',serif; font-size:24px; color:#f1e6cc; letter-spacing:.5px;">Game Master</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Cartão de pergaminho -->
+          <tr>
+            <td style="background:#f1e6cc; border-radius:18px; border:1px solid #c9b48a; padding:36px 32px; font-family:'Segoe UI',Helvetica,Arial,sans-serif; color:#2b1f16;">
+
+              <!-- Selo do convite -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 18px;">
+                <tr>
+                  <td style="width:48px; height:48px; border-radius:12px; background:#b23a2c; text-align:center; vertical-align:middle; font-size:24px; color:#fff7e8;">&#9993;</td>
+                  <td style="padding-left:12px; font-size:12px; font-weight:700; letter-spacing:1.6px; text-transform:uppercase; color:#8a5a12;">Convite para a mesa</td>
+                </tr>
+              </table>
+
+              <h1 style="margin:0 0 16px; font-family:Georgia,'Times New Roman',serif; font-weight:400; font-size:30px; line-height:1.15; color:#2b1f16;">Tem um lugar reservado para você</h1>
+
+              <p style="margin:0 0 24px; font-size:16px; line-height:1.55; color:#5a4430;">
+                Você foi convidado para o Game Master com o endereço <strong style="color:#2b1f16;">{{ .Email }}</strong>.
+                Aceite o convite para criar sua conta — o mestre já está esperando o grupo.
+              </p>
+
+              <!-- Botão -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+                <tr>
+                  <td align="center" bgcolor="#b23a2c" style="border-radius:12px; background:#b23a2c; border-bottom:3px solid #7d2219;">
+                    <a href="{{ .ConfirmationURL }}" target="_blank" style="display:inline-block; padding:15px 28px; font-family:'Segoe UI',Helvetica,Arial,sans-serif; font-size:16px; font-weight:700; color:#fff7e8; text-decoration:none; border-radius:12px;">
+                      Aceitar convite &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Como funciona -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px; background:#fbf5e6; border:1px dashed #b49a6c; border-radius:12px;">
+                <tr>
+                  <td style="padding:16px 18px; font-size:14px; line-height:1.6; color:#5a4430;">
+                    <strong style="color:#2b1f16;">Como funciona:</strong><br>
+                    &#9670;&nbsp; Aceite o convite e escolha sua senha<br>
+                    &#9670;&nbsp; Abra sua ficha — no celular ou no computador<br>
+                    &#9670;&nbsp; O mestre acompanha seu status; suas anotações ficam só com você
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0 0 6px; font-size:13px; line-height:1.5; color:#6b5640;">
+                O botão não funciona? Copie e cole este link no navegador:
+              </p>
+              <p style="margin:0 0 24px; font-size:12px; line-height:1.5; word-break:break-all;">
+                <a href="{{ .ConfirmationURL }}" target="_blank" style="color:#8a5a12;">{{ .ConfirmationURL }}</a>
+              </p>
+
+              <p style="margin:0; padding-top:16px; border-top:1px dashed #b49a6c; font-size:13px; line-height:1.5; color:#6b5640;">
+                Não esperava este convite? Pode ignorar este e-mail — nenhuma conta é criada sem você aceitar.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Rodapé -->
+          <tr>
+            <td align="center" style="padding:20px 8px 0; font-family:'Segoe UI',Helvetica,Arial,sans-serif; font-size:12px; line-height:1.5; color:#9c8768;">
+              Game Master · A mesa inteira num só lugar<br>
+              <a href="{{ .SiteURL }}" target="_blank" style="color:#c9b48a;">{{ .SiteURL }}</a>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
