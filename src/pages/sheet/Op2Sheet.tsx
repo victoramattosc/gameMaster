@@ -58,7 +58,7 @@ export function Op2Sheet({ sheet: s, update, roll }: SheetProps<Sheet>) {
               <Field label="Nome" big value={s.t.nome} onChange={setT("nome")} />
               <div className={styles.grid2}>
                 <Field label="Perfil" value={s.t.perfil} onChange={setT("perfil")} />
-                <Field label="Ocupação" value={s.t.ocupacao} onChange={setT("ocupacao")} />
+                <Field label="Vocação" value={s.t.ocupacao} onChange={setT("ocupacao")} />
                 <Field label="Nível" value={s.t.nivel} onChange={setT("nivel")} />
                 <Field label="NEX" value={s.t.nex} onChange={setT("nex")} />
               </div>
@@ -82,7 +82,7 @@ export function Op2Sheet({ sheet: s, update, roll }: SheetProps<Sheet>) {
               </div>
             ))}
           </div>
-          <div className="gm-hint">Valor 1–6 vira dado: 1–2 d4 · 3 d6 · 4 d8 · 5 d10 · 6 d12.</div>
+          <div className="gm-hint">1 = d4 · 2 = d6 (média humana) · 3 = d8 · 4 = d10 · 5 = d12 · 6 = d20 (só com influência paranormal).</div>
         </section>
       </div>
 
@@ -94,7 +94,7 @@ export function Op2Sheet({ sheet: s, update, roll }: SheetProps<Sheet>) {
       <section id="pericias" className="gm-sec" style={{ ["--sys" as string]: "#2a8a80" }} data-g="skills">
         <div className={styles.headRow}>
           <h2 className="gm-ban">Perícias</h2>
-          <span className="gm-hint">Teste = dado da perícia + dado do atributo.</span>
+          <span className="gm-hint">Teste = dado do atributo + dado da perícia · DT padrão 7 · d4 = destreinado, d6 treinado, d8 especialista, d10 mestre, d12 grão-mestre.</span>
         </div>
         <div className={styles.skills}>
           {OP2_SK.map(([label, at], i) => {
@@ -104,7 +104,7 @@ export function Op2Sheet({ sheet: s, update, roll }: SheetProps<Sheet>) {
                 <span>{label}</span>
                 <span className={styles.attrTag} style={{ ["--tag-bg" as string]: "#d4ece8", ["--tag-ink" as string]: "#1d5f58", width: 64 }}>{OP2_ATTR.find((x) => x[0] === at)?.[1]}</span>
                 <select className="gm-in" aria-label={`Nível em ${label}`} value={v} onChange={(e) => update((x) => ({ ...x, sk: x.sk.map((y, j) => (j === i ? Number(e.target.value) : y)) }))} style={{ width: 70, height: 34, paddingLeft: 10 }}>
-                  {[1, 2, 3, 4, 5, 6].map((n) => <option key={n} value={n}>{n}</option>)}
+                  {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{OP2_DIE[n]}</option>)}
                 </select>
                 <span className={styles.bonus} style={{ width: 80, fontSize: 14 }}>{OP2_DIE[v]}+{OP2_DIE[s.a[at]]}</span>
                 <button type="button" className={`gm-btn ${styles.rollBtn}`} aria-label={`Rolar ${label}`} onClick={() => roll(roll2(label, v, s.a[at]))}><IconD20 size={18} /></button>
@@ -112,17 +112,9 @@ export function Op2Sheet({ sheet: s, update, roll }: SheetProps<Sheet>) {
             );
           })}
         </div>
-        <div style={{ padding: 12, borderRadius: 12, background: "#e9dcbd", display: "flex", flexWrap: "wrap", gap: 10, alignItems: "flex-end" }}>
-          <div style={{ flex: "1 1 200px" }}><Field label="Aptidão" value={s.t.aptidao} onChange={setT("aptidao")} /></div>
-          <label className="gm-lbl">
-            Nível
-            <select className="gm-in" value={s.apt} onChange={(e) => update((x) => ({ ...x, apt: Number(e.target.value) }))} style={{ width: 70 }}>
-              {[1, 2, 3, 4, 5, 6].map((n) => <option key={n} value={n}>{n}</option>)}
-            </select>
-          </label>
-          <span className={styles.calcDark} style={{ padding: "0 12px" }}>{OP2_DIE[s.apt]}+{OP2_DIE[s.a.mente]}</span>
-          <button type="button" className="gm-btn gm-btn--ink" style={{ background: "#2a8a80" }} onClick={() => roll(roll2(`Aptidão (${s.t.aptidao || "—"})`, s.apt, s.a.mente))}>Rolar aptidão</button>
-          <div style={{ flexBasis: "100%" }}><Field label="Descrição da aptidão" value={s.t.aptidaoDesc} onChange={setT("aptidaoDesc")} /></div>
+        <div style={{ padding: 12, borderRadius: 12, background: "#e9dcbd", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10 }}>
+          <Field label="Área da Aptidão" value={s.t.aptidao} onChange={setT("aptidao")} placeholder="Artes, Erudição, Folclore, Guerra, Nobreza ou Religião" />
+          <Field label="Área do Ofício" value={s.t.aptidaoDesc} onChange={setT("aptidaoDesc")} placeholder="Alquimia, Carpintaria, Metalurgia…" />
         </div>
       </section>
 

@@ -6,7 +6,7 @@ export const DND_AB: [DndAb, string][] = [
   ["for", "FORÇA"], ["des", "DESTREZA"], ["con", "CONSTITUIÇÃO"], ["int", "INTELIGÊNCIA"], ["sab", "SABEDORIA"], ["car", "CARISMA"],
 ];
 export const DND_SK: [string, string, DndAb][] = [
-  ["acrobacia", "Acrobacia", "des"], ["adestrar", "Adestrar Animais", "sab"], ["arcanismo", "Arcanismo", "int"],
+  ["acrobacia", "Acrobacia", "des"], ["adestrar", "Lidar com Animais", "sab"], ["arcanismo", "Arcanismo", "int"],
   ["atletismo", "Atletismo", "for"], ["atuacao", "Atuação", "car"], ["enganacao", "Enganação", "car"],
   ["furtividade", "Furtividade", "des"], ["historia", "História", "int"], ["intimidacao", "Intimidação", "car"],
   ["intuicao", "Intuição", "sab"], ["investigacao", "Investigação", "int"], ["medicina", "Medicina", "sab"],
@@ -45,6 +45,13 @@ export interface DndSheet {
   spells: { name: string; prep: boolean }[][];
   conditions: string[];
   portrait?: string | null;
+  subclass?: string;
+  /** Escolhas da progressão: "asi-4" → "attr:for,des" | "feat:Nome"; "dadiva-19" → texto. */
+  choices?: Record<string, string>;
+  /** O que o app calcula sozinho pela classe e nível. */
+  auto?: { hp: boolean; slots: boolean; saves: boolean };
+  /** Perícias marcadas automaticamente pelo antecedente. */
+  autoSk?: string[];
 }
 
 export function dndDefault(player: string): DndSheet {
@@ -65,6 +72,7 @@ export function dndDefault(player: string): DndSheet {
     coins: { PC: 0, PP: 0, PE: 0, PO: 0, PL: 0 }, spellAb: "sab",
     slots: Array(10).fill(0), used: Array(10).fill(0), spells: Array.from({ length: 10 }, () => []),
     conditions: [],
+    auto: { hp: true, slots: true, saves: true },
   };
 }
 

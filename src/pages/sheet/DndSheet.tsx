@@ -1,11 +1,15 @@
 import React from "react";
+import { applyDndAutomation } from "systems/dndProgression";
+import { DndProgression } from "./DndProgression";
 import { d20, DND_AB, DND_COINS, DND_SK, DND_SPELL_LEVELS, dndMod, dndProf, dndSkillBonus, DndAb, DndSheet as Sheet, DndText } from "systems/dnd";
 import { IconD20 } from "ui/Icons";
 import { Bar, signed } from "ui/bits";
 import { ConditionsLine, EditTable, Field, NotesSection, NumIn, Portrait, SheetProps } from "./common";
 import styles from "./Sheet.module.scss";
 
-export function DndSheet({ sheet: s, update, roll }: SheetProps<Sheet>) {
+export function DndSheet({ sheet: s, update: rawUpdate, roll }: SheetProps<Sheet>) {
+  // Toda mudança passa pela automação (classe, nível, antecedente e aumentos).
+  const update = (fn: (x: Sheet) => Sheet) => rawUpdate((prev) => applyDndAutomation(prev, fn(prev)));
   const t = (k: DndText) => s.t[k] || "";
   const setT = (k: DndText) => (v: string) => update((x) => ({ ...x, t: { ...x.t, [k]: v } }));
   const set = <K extends keyof Sheet>(k: K, v: Sheet[K]) => update((x) => ({ ...x, [k]: v }));
@@ -16,12 +20,13 @@ export function DndSheet({ sheet: s, update, roll }: SheetProps<Sheet>) {
 
   return (
     <>
-      <section id="personagem" className="gm-sec" data-g="status">
+      <div className={styles.row} data-g="status">
+      <section id="personagem" className="gm-sec" style={{ flex: "3 1 520px" }} data-g="status">
         <h2 className="gm-ban">Personagem</h2>
         <ConditionsLine conditions={s.conditions} />
         <div style={{ display: "flex", flexWrap: "wrap", gap: 20, alignItems: "flex-start" }}>
           <Portrait url={s.portrait} color="#b23a2c" onChange={(u) => set("portrait", u)} />
-          <div style={{ flex: "1 1 320px", minWidth: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
+          <div style={{ flex: "1 1 280px", minWidth: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12 }}>
             <div style={{ gridColumn: "1 / -1" }}><Field label="Nome do personagem" big value={t("nome")} onChange={setT("nome")} /></div>
             <Field label="Classe" value={t("classe")} onChange={setT("classe")} />
             <label className="gm-lbl">Nível<NumIn value={s.level} min={1} max={20} onChange={(v) => set("level", v)} /></label>
@@ -33,6 +38,73 @@ export function DndSheet({ sheet: s, update, roll }: SheetProps<Sheet>) {
           </div>
         </div>
       </section>
+
+      <section id="vida" className="gm-sec" style={{ flex: "2 1 380px" }} data-g="status">
+        <h2 className="gm-ban">Vida e defesa</h2>
+        <div className={styles.vitals}>
+          <label className={`${styles.vital} ${styles.vitalDark}`} title={`Sem armadura (bárbaro/monge): 10 + DES + CON = ${10 + dndMod(s, "des") + dndMod(s, "con")}`}>
+            <NumIn className="" label="Classe de armadura" value={s.ca} onChange={(v) => set("ca", v)} />
+            <span>CA</span>
+          </label>
+          <button type="button" className={`gm-btn ${styles.vital}`} onClick={() => roll(d20("Iniciativa", dndMod(s, "des")))} aria-label="Rolar iniciativa">
+            <b>{signed(dndMod(s, "des"))}</b>
+            <span>Iniciativa</span>
+          </button>
+          <label className={styles.vital}>
+            <input aria-label="Deslocamento" value={t("deslocamento")} onChange={(e) => setT("deslocamento")(e.target.value)} style={{ fontSize: 20 }} />
+            <span>Deslocamento</span>
+          </label>
+          <label className={styles.vital}>
+            <input aria-label="Dados de vida" value={t("dvTotal")} onChange={(e) => setT("dvTotal")(e.target.value)} placeholder="1d12" style={{ fontSize: 20 }} />
+            <span>Dados de vida</span>
+          </label>
+        </div>
+
+        <div className={styles.resHead}>
+          <h2>Pontos de Vida</h2>
+          <span className={styles.resChip} style={{ background: "#c2412d" }}>PV{s.temp ? ` +${s.temp} temp` : ""}</span>
+        </div>
+        <div className={styles.resCtl}>
+          <button type="button" className="gm-btn" aria-label="Tomar 1 de dano" onClick={() => update((x) => (x.temp > 0 ? { ...x, temp: x.temp - 1 } : { ...x, hp: Math.max(0, x.hp - 1) }))}>−</button>
+          <div className={styles.resVal}>
+            <NumIn className="" label="PV atuais" value={s.hp} min={0} onChange={(v) => set("hp", v)} />
+            <span> / {s.hpMax}</span>
+          </div>
+          <button type="button" className="gm-btn" aria-label="Curar 1" onClick={() => update((x) => ({ ...x, hp: Math.min(x.hpMax, x.hp + 1) }))}>+</button>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <Bar cur={s.hp} max={s.hpMax} color="#c2412d" />
+          {s.temp > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 800, color: "#3f5f8a" }}>
+              <span>+{s.temp} temp</span>
+              <Bar cur={s.temp} max={s.hpMax} color="#3f7cc4" />
+            </div>
+          )}
+        </div>
+        <div className={styles.grid3}>
+          <label className="gm-lbl">PV máximo<NumIn value={s.hpMax} min={1} onChange={(v) => set("hpMax", v)} /></label>
+          <label className="gm-lbl">Temporários<NumIn value={s.temp} min={0} onChange={(v) => set("temp", v)} /></label>
+          <label className="gm-lbl">DV restantes<input className="gm-in" value={t("dv")} onChange={(e) => setT("dv")(e.target.value)} /></label>
+        </div>
+
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px 16px", paddingTop: 10, borderTop: "1px dashed #b49a6c" }}>
+          <span className="gm-lbl" style={{ flexBasis: "100%" }}>Testes contra a morte</span>
+          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <b style={{ fontSize: 14 }}>Sucessos</b>
+            <span className={styles.dots} style={{ color: "#4f8f3c" }}>
+              {s.ok.map((v, i) => <button key={i} type="button" className="gm-btn" aria-pressed={v} aria-label={`Sucesso ${i + 1}`} onClick={() => toggleArr("ok", i)} />)}
+            </span>
+          </span>
+          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <b style={{ fontSize: 14 }}>Falhas</b>
+            <span className={styles.dots} style={{ color: "#b23a2c" }}>
+              {s.fail.map((v, i) => <button key={i} type="button" className="gm-btn" aria-pressed={v} aria-label={`Falha ${i + 1}`} onClick={() => toggleArr("fail", i)} />)}
+            </span>
+          </span>
+          <button type="button" className="gm-btn gm-btn--ghost" style={{ height: 36 }} onClick={() => roll(d20("Teste contra a morte", 0))}>Rolar teste</button>
+        </div>
+      </section>
+      </div>
 
       <div className={styles.row}>
         <section className="gm-sec" style={{ flex: "1 1 320px" }} data-g="status">
@@ -63,25 +135,28 @@ export function DndSheet({ sheet: s, update, roll }: SheetProps<Sheet>) {
             <h2 className="gm-ban">Salvaguardas e perícias</h2>
             <span className="gm-hint">Marque a bolinha para proficiência. Toque no dado para rolar.</span>
           </div>
-          <div className={styles.skills} style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
+          <div className="gm-eyebrow" style={{ color: "#5a4430" }}>Salvaguardas</div>
+          <div className={styles.dndSkills}>
             {DND_AB.map(([k, label]) => {
               const b = dndMod(s, k) + (s.saveProf[k] ? prof : 0);
               const nm = label.charAt(0) + label.slice(1).toLowerCase();
               return (
-                <div key={k} className={styles.skill}>
+                <div key={k} className={styles.dndSkill}>
                   <button type="button" className={`gm-btn ${styles.profDot}`} aria-pressed={!!s.saveProf[k]} aria-label={`Proficiência em salvaguarda de ${nm}`} onClick={() => update((x) => ({ ...x, saveProf: { ...x.saveProf, [k]: !x.saveProf[k] } }))} />
-                  <span>Salvaguarda · {nm}</span>
+                  <span>{nm}</span>
+                  <span className={styles.attrTag} style={{ ["--tag-bg" as string]: "#f3d9d3", ["--tag-ink" as string]: "#7d2219" }}>{k.toUpperCase()}</span>
                   <span className={styles.bonus}>{signed(b)}</span>
                   <button type="button" className={`gm-btn ${styles.rollBtn}`} aria-label={`Rolar salvaguarda de ${nm}`} onClick={() => roll(d20(`Salvaguarda de ${nm}`, b))}><IconD20 size={18} /></button>
                 </div>
               );
             })}
           </div>
-          <div className={styles.skills} style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
+          <div className="gm-eyebrow" style={{ color: "#5a4430", marginTop: 8 }}>Perícias</div>
+          <div className={styles.dndSkills}>
             {DND_SK.map(([k, label, at]) => {
               const b = dndSkillBonus(s, k, at);
               return (
-                <div key={k} className={styles.skill}>
+                <div key={k} className={styles.dndSkill}>
                   <button type="button" className={`gm-btn ${styles.profDot}`} aria-pressed={!!s.skillProf[k]} aria-label={`Proficiência em ${label}`} onClick={() => update((x) => ({ ...x, skillProf: { ...x.skillProf, [k]: !x.skillProf[k] } }))} />
                   <span>{label}</span>
                   <span className={styles.attrTag} style={{ ["--tag-bg" as string]: "#f3d9d3", ["--tag-ink" as string]: "#7d2219" }}>{at.toUpperCase()}</span>
@@ -95,64 +170,11 @@ export function DndSheet({ sheet: s, update, roll }: SheetProps<Sheet>) {
         </section>
       </div>
 
-      <section id="combate" className="gm-sec" data-g="status">
-        <h2 className="gm-ban">Combate</h2>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 18, alignItems: "flex-start" }}>
-          <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-            <div className={styles.shield}>
-              <NumIn className="" label="Classe de armadura" value={s.ca} onChange={(v) => set("ca", v)} style={{ width: 48, border: "none", background: "transparent", color: "#f1e6cc", font: "800 30px Alegreya, serif", textAlign: "center", padding: 0 }} />
-              <span>CA</span>
-            </div>
-            <div className="gm-hint" style={{ maxWidth: 160 }}>Sem armadura (bárbaro): 10 + DES + CON = {10 + dndMod(s, "des") + dndMod(s, "con")}</div>
-          </div>
-          <button type="button" className="gm-btn" onClick={() => roll(d20("Iniciativa", dndMod(s, "des")))} style={{ flexDirection: "column", width: 92, height: 82, borderRadius: 14, background: "#e2d1ab", color: "#2b1f16" }}>
-            <span className="gm-num" style={{ fontSize: 28 }}>{signed(dndMod(s, "des"))}</span>
-            <span style={{ fontSize: 11 }}>INICIATIVA</span>
-          </button>
-          <label className="gm-lbl" style={{ width: 120 }}>Deslocamento<input className="gm-in" value={t("deslocamento")} onChange={(e) => setT("deslocamento")(e.target.value)} /></label>
-          <label className="gm-lbl" style={{ width: 120 }}>Dados de vida<input className="gm-in" value={t("dvTotal")} onChange={(e) => setT("dvTotal")(e.target.value)} placeholder="1d12" /></label>
-          <label className="gm-lbl" style={{ width: 120 }}>Restantes<input className="gm-in" value={t("dv")} onChange={(e) => setT("dv")(e.target.value)} /></label>
-        </div>
+      <DndProgression sheet={s} update={update} />
 
-        <div className={styles.row}>
-          <div style={{ flex: "2 1 340px", display: "flex", flexDirection: "column", gap: 10 }}>
-            <div className={styles.resHead}>
-              <h2>Pontos de Vida</h2>
-              <span className={styles.resChip} style={{ background: "#c2412d" }}>PV{s.temp ? ` +${s.temp} temp` : ""}</span>
-            </div>
-            <div className={styles.resCtl}>
-              <button type="button" className="gm-btn" aria-label="Tomar 1 de dano" onClick={() => update((x) => (x.temp > 0 ? { ...x, temp: x.temp - 1 } : { ...x, hp: Math.max(0, x.hp - 1) }))}>−</button>
-              <div className={styles.resVal}>
-                <NumIn className="" label="PV atuais" value={s.hp} min={0} onChange={(v) => set("hp", v)} />
-                <span> / {s.hpMax}</span>
-              </div>
-              <button type="button" className="gm-btn" aria-label="Curar 1" onClick={() => update((x) => ({ ...x, hp: Math.min(x.hpMax, x.hp + 1) }))}>+</button>
-            </div>
-            <Bar cur={s.hp} max={s.hpMax} color="#c2412d" />
-            <div className={styles.grid2}>
-              <label className="gm-lbl">PV máximo<NumIn value={s.hpMax} min={1} onChange={(v) => set("hpMax", v)} /></label>
-              <label className="gm-lbl">PV temporários<NumIn value={s.temp} min={0} onChange={(v) => set("temp", v)} /></label>
-            </div>
-          </div>
-          <div style={{ flex: "1 1 220px", display: "flex", flexDirection: "column", gap: 10 }}>
-            <div className="gm-lbl">Testes contra a morte</div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ width: 70, fontWeight: 700 }}>Sucessos</span>
-              <div className={styles.dots} style={{ color: "#4f8f3c" }}>
-                {s.ok.map((v, i) => <button key={i} type="button" className="gm-btn" aria-pressed={v} aria-label={`Sucesso ${i + 1}`} onClick={() => toggleArr("ok", i)} />)}
-              </div>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ width: 70, fontWeight: 700 }}>Falhas</span>
-              <div className={styles.dots} style={{ color: "#b23a2c" }}>
-                {s.fail.map((v, i) => <button key={i} type="button" className="gm-btn" aria-pressed={v} aria-label={`Falha ${i + 1}`} onClick={() => toggleArr("fail", i)} />)}
-              </div>
-            </div>
-            <button type="button" className="gm-btn gm-btn--ghost" style={{ alignSelf: "flex-start", height: 36 }} onClick={() => roll(d20("Teste contra a morte", 0))}>Rolar teste</button>
-          </div>
-        </div>
+      <section id="combate" className="gm-sec" data-g="skills">
+        <h2 className="gm-ban">Ataques e conjuração</h2>
 
-        <div className="gm-lbl" style={{ marginTop: 6 }}>Ataques e conjuração</div>
         <EditTable
           cols={[{ key: "n", label: "Nome", width: "2fr" }, { key: "b", label: "Bônus", width: "90px" }, { key: "d", label: "Dano / tipo", width: "2fr" }]}
           rows={s.weapons}
@@ -260,5 +282,5 @@ export function DndSheet({ sheet: s, update, roll }: SheetProps<Sheet>) {
 }
 
 export const DND_SECTIONS: [string, string][] = [
-  ["personagem", "Personagem"], ["combate", "Combate"], ["equipamento", "Equipamento"], ["tracos", "Traços e história"], ["magias", "Magias"], ["notas", "Anotações"],
+  ["personagem", "Personagem"], ["vida", "Vida e defesa"], ["progressao", "Progressão"], ["combate", "Ataques"], ["equipamento", "Equipamento"], ["tracos", "Traços e história"], ["magias", "Magias"], ["notas", "Anotações"],
 ];

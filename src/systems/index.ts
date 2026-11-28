@@ -1,7 +1,7 @@
 import type { CustomSchema, ResourceStatus, SystemKey } from "lib/types";
 import { dndDefault, dndStatus, DndSheet } from "./dnd";
 import { opDefault, opStatus, OpSheet } from "./op";
-import { op2Default, op2Status, Op2Sheet } from "./op2";
+import { migrateOp2Skills, op2Default, op2Status, Op2Sheet } from "./op2";
 import { customDefault, customStatus, CustomSheet } from "./custom";
 
 export interface SystemMeta {
@@ -39,9 +39,9 @@ export const SYSTEMS: Record<SystemKey, SystemMeta> = {
     key: "op2", label: "Ordem Paranormal II", short: "Ordem II", color: "#2a8a80", mark: "II",
     desc: "Versão comunitária com atributos em dados (d4 a d20).",
     ships: "Ficha + Livro de Regras", bookHint: "Ordem Paranormal II — Regras (PDF)",
-    summary: "Físico, Mente e Emoção de 1 a 6 viram dados (d4 a d20), 19 perícias + aptidão somando dado do atributo e dado da perícia, perfil, ocupação, nível, NEX, PV, PD e cinco espaços de habilidades.",
+    summary: "Playtest 1.2: Físico, Mente e Emoção e 20 perícias em dados de d4 a d12 (d20 só com o paranormal); teste = dado do atributo + dado da perícia. Perfil, vocação, nível, PV, PD e habilidades.",
     sheetTitle: "Ficha de Agente",
-    importFields: ["Nome", "Perfil", "Ocupação", "Nível", "NEX", "Físico / Mente / Emoção", "19 perícias", "Aptidão", "PV", "PD", "Habilidades"],
+    importFields: ["Nome", "Perfil", "Vocação", "Nível", "Físico / Mente / Emoção", "20 perícias", "PV", "PD", "Habilidades"],
   },
   custom: {
     key: "custom", label: "Personalizado", short: "Personalizado", color: "#8a6a2e", mark: "+",
@@ -98,5 +98,9 @@ export function normalizeSheet<T extends AnySheet>(system: SystemKey, raw: unkno
       out[k] = v;
     }
   });
+  if (system === "op2") {
+    const o = out as unknown as Op2Sheet;
+    o.sk = migrateOp2Skills(Array.isArray(o.sk) ? o.sk : [], o.apt);
+  }
   return out as unknown as T;
 }

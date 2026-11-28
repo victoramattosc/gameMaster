@@ -395,8 +395,10 @@ textarea.gm-in {
 }
 
 .gm-bar {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   height: 12px;
+  max-height: 12px;
   border-radius: $radius-pill;
   background: #d9c49a;
   overflow: hidden;

@@ -59,7 +59,7 @@ export interface OpSheet {
   resist: string;
   sk: Record<string, { t: number; o: number }>;
   attacks: { n: string; t: string; d: string; e: string }[];
-  abilities: { n: string; c: string; p: string; d: string }[];
+  abilities: { n: string; c: string; p: string; d: string; src?: string }[];
   items: { n: string; c: string; e: number }[];
   prestigio: number;
   patente: string;
@@ -72,6 +72,10 @@ export interface OpSheet {
   notas: string;
   conditions: string[];
   portrait?: string | null;
+  /** Escolhas da progressão (poder, atributo…) por id do passo. */
+  choices?: Record<string, string>;
+  /** Perícias treinadas automaticamente pela origem. */
+  autoSk?: string[];
 }
 
 export function opDefault(player: string): OpSheet {
@@ -123,8 +127,9 @@ export function opCalc(s: OpSheet): OpCalc {
   if (base) {
     const more = s.nex <= 5 ? 0 : steps - 1;
     const desg = or === "desgarrado" ? steps : 0;
-    pvMax = base.pv[0] + a.vig + more * (base.pv[1] + a.vig) + num(s.mod.pv) + desg;
-    fPv = `${cl}: ${base.pv[0]} + VIG ${a.vig} + ${more} × (${base.pv[1]} + VIG)${desg ? " + Desgarrado " + desg : ""} + mod`;
+    const casca = s.trilha === "Tropa de Choque" && s.nex >= 10 ? steps : 0;
+    pvMax = base.pv[0] + a.vig + more * (base.pv[1] + a.vig) + num(s.mod.pv) + desg + casca;
+    fPv = `${cl}: ${base.pv[0]} + VIG ${a.vig} + ${more} × (${base.pv[1]} + VIG)${desg ? " + Desgarrado " + desg : ""}${casca ? " + Casca Grossa " + casca : ""} + mod`;
     const uni = or === "universitario" ? Math.min(10, Math.floor((s.nex + 5) / 10)) : 0;
     peMax = base.pe[0] + a.pre + more * (base.pe[1] + a.pre) + num(s.mod.pe) + uni;
     fPe = `${cl}: ${base.pe[0]} + PRE ${a.pre} + ${more} × (${base.pe[1]} + PRE)${uni ? " + Universitário " + uni : ""} + mod`;
@@ -143,7 +148,7 @@ export function opCalc(s: OpSheet): OpCalc {
     dt: 10 + steps + a.pre + num(s.modDt) + (or === "universitario" ? 1 : 0),
     peRodada: Math.round(s.nex / 5) + (or === "universitario" ? 1 : 0),
     carga,
-    cargaMax: Math.max(2, 5 * a.for),
+    cargaMax: Math.max(2, 5 * (a.for + (s.trilha === "Técnico" && s.nex >= 10 ? a.int : 0))),
     bonus,
   };
 }

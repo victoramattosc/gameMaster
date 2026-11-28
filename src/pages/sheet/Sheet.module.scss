@@ -259,9 +259,13 @@
 }
 .resVal {
   flex: 1;
-  text-align: center;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  white-space: nowrap;
   input {
-    width: 2.6em;
+    width: 3.2ch;
     border: none;
     background: transparent;
     text-align: center;
@@ -553,4 +557,133 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+/* Linha de NEX / PE por rodada / deslocamento: rótulos curtos numa linha só */
+.tight :global(.gm-lbl) {
+  white-space: nowrap;
+  letter-spacing: 0.4px;
+  font-size: 11px;
+}
+
+/* Perícias de Ordem: nome + atributo numa célula, controles em colunas fixas */
+.opSkills {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+  column-gap: 28px;
+  row-gap: 2px;
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+.opSkill {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 118px 54px 40px 34px;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px dashed #d0bc92;
+  @include mobile {
+    grid-template-columns: minmax(0, 1fr) 104px 48px 34px 34px;
+    gap: 6px;
+  }
+}
+.skName {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.2;
+  sup {
+    margin-left: 2px;
+    font-size: 11px;
+    color: var(--sys-ink, #5a3a8a);
+  }
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+}
+
+/* D&D: bolinha · nome · atributo · bônus · dado sempre nas mesmas colunas */
+.dndSkills {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  column-gap: 28px;
+  row-gap: 2px;
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+.dndSkill {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 44px 40px 34px;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px dashed #d0bc92;
+  > span:nth-child(2) {
+    font-weight: 700;
+    font-size: 15px;
+    min-width: 0;
+  }
+}
+.dndSkillGap {
+  height: 10px;
+}
+
+/* D&D: bloco de vida e defesa */
+.vitals {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  @include mobile {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.vital {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 78px;
+  padding: 8px 6px;
+  border-radius: 14px;
+  background: $paper-dark;
+  color: $ink;
+  text-align: center;
+  > b,
+  input {
+    font: 800 26px $font-num;
+  }
+  > span {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: $ink-soft;
+  }
+  input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    text-align: center;
+    color: $ink;
+    padding: 0;
+  }
+}
+.vitalDark {
+  background: $ink;
+  color: $paper;
+  > span {
+    color: $text-muted;
+  }
+  input {
+    color: $paper;
+  }
 }
