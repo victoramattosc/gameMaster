@@ -14,7 +14,7 @@ cálculos automáticos, e o mestre acompanha vida, recursos e condições de tod
 1. Crie um projeto em [supabase.com](https://supabase.com).
 2. No **SQL Editor**, rode `supabase/migrations/0001_init.sql` (tabelas, policies, funções, buckets e realtime).
 3. Em **Authentication → URL Configuration**, adicione a URL do app (ex.: `http://localhost:3000`) aos redirects.
-4. Copie `.env.example` para `.env.local` e preencha `SUPABASE_URL` e `SUPABASE_ANON_KEY`.
+4. Copie `.env.example` para `.env.local` e preencha `REACT_APP_SUPABASE_URL` e `REACT_APP_SUPABASE_ANON_KEY`.
 5. `npm install` e `npm start`.
 
 ## Estrutura
