@@ -1,7 +1,7 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const url = process.env.SUPABASE_URL;
-const anonKey = process.env.SUPABASE_ANON_KEY;
+const url = process.env.REACT_APP_SUPABASE_URL;
+const anonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
 
 export const isSupabaseConfigured = Boolean(
   url && anonKey && !url.includes("SEU-PROJETO"),
