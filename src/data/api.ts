@@ -353,6 +353,23 @@ export function useReceivedItems(mesaId: string | undefined, userId: string | un
       : null
   );
 }
+/** Tudo que o mestre já me entregou nesta mesa (guardado na ficha ou não). */
+export function useMyItems(mesaId: string | undefined, userId: string | undefined) {
+  return useScope<ChestItem>(
+    mesaId && userId
+      ? {
+          key: `my-items:${mesaId}`,
+          collection: "chest_items",
+          selector: { mesa_id: mesaId, given_to: userId },
+          sort: [{ created_at: "asc" }],
+          fetch: async () =>
+            check(await supabase.from("chest_items").select("*").eq("mesa_id", mesaId).eq("given_to", userId).order("created_at")) as ChestItem[],
+          realtime: [{ table: "chest_items", filter: `given_to=eq.${userId}`, apply: "chest_items" }],
+          staleMs: STALE.medium,
+        }
+      : null
+  );
+}
 export async function claimItem(id: string) {
   check(await supabase.from("chest_items").update({ claimed: true }).eq("id", id));
 }
@@ -411,6 +428,11 @@ export async function shareFile(id: string, shared: boolean) {
   check(await supabase.rpc("share_file", { p_file: id, p_shared: shared }));
 }
 
+/** Entrega (ou retira) um arquivo a um jogador específico. */
+export async function giveFile(id: string, userId: string, give = true) {
+  check(await supabase.rpc("give_file", { p_file: id, p_user: userId, p_give: give }));
+}
+
 export async function updateFileMeta(id: string, meta: MesaFile["meta"]) {
   check(await supabase.from("mesa_files").update({ meta }).eq("id", id));
 }
@@ -447,9 +469,25 @@ export async function uploadPortrait(userId: string, file: File): Promise<string
   checkUploadSize(file);
   const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "");
   const path = `${userId}/${crypto.randomUUID()}.${ext}`;
-  const up = await supabase.storage.from("portraits").upload(path, file, { contentType: file.type || undefined, upsert: true });
+  const up = await supabase.storage.from("portraits").upload(path, file, { contentType: file.type || undefined });
   if (up.error) throw up.error;
   return supabase.storage.from("portraits").getPublicUrl(path).data.publicUrl;
+}
+
+/**
+ * Apaga do Storage um retrato que deixou de ser usado. Se o mesmo retrato ainda aparece em
+ * outra ficha minha (ex.: ficha copiada de outra mesa), mantém o arquivo.
+ */
+export async function deletePortrait(userId: string, url: string | null | undefined) {
+  const marker = "/object/public/portraits/";
+  const i = url ? url.indexOf(marker) : -1;
+  if (!url || i < 0) return;
+  const path = decodeURIComponent(url.slice(i + marker.length).split("?")[0]);
+  if (!path.startsWith(`${userId}/`)) return;
+  const { data } = await supabase.from("character_status").select("character_id").eq("user_id", userId).eq("portrait_url", url);
+  if ((data?.length ?? 0) > 1) return;
+  const { error } = await supabase.storage.from("portraits").remove([path]);
+  if (error) throw error;
 }
 
 // ───────────────────────── Notificações ─────────────────────────

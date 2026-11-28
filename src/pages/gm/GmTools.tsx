@@ -16,6 +16,7 @@ const TAG_COLOR: Record<InitiativeEntry["kind"], string> = { Jogador: "#7a4fc0",
 
 export function InitiativePanel({ data, update, partyNames }: { data: GmData; update: Update; partyNames: string[] }) {
   const [draft, setDraft] = useState("");
+  const [value, setValue] = useState("");
   const [kind, setKind] = useState<InitiativeEntry["kind"]>("Criatura");
   const confirm = useConfirm();
   const list = data.initiative || [];
@@ -24,13 +25,14 @@ export function InitiativePanel({ data, update, partyNames }: { data: GmData; up
 
   function add(e: React.FormEvent) {
     e.preventDefault();
-    const m = draft.trim().match(/^(.*?)[\s,;]+(-?\d+)$/);
-    const name = (m ? m[1] : draft).trim();
-    if (!name) return;
-    const value = m ? Number(m[2]) : 1 + Math.floor(Math.random() * 20);
+    // Cada um rola a própria iniciativa; o mestre só anota nome, valor e tipo.
+    const name = draft.trim();
+    const v = Number(value);
+    if (!name || value.trim() === "" || !Number.isFinite(v)) return;
     const k = partyNames.includes(name) ? "Jogador" : kind;
-    update((d) => ({ ...d, initiative: sortIni([...(d.initiative || []), { id: uid(), name, value, kind: k }]) }));
+    update((d) => ({ ...d, initiative: sortIni([...(d.initiative || []), { id: uid(), name, value: v, kind: k }]) }));
     setDraft("");
+    setValue("");
   }
 
   return (
@@ -40,7 +42,7 @@ export function InitiativePanel({ data, update, partyNames }: { data: GmData; up
         <span style={{ fontSize: 14, color: "#c9b48a", fontWeight: 700 }}>Rodada {round}</span>
       </div>
       <ol className={styles.iniList}>
-        {list.length === 0 && <li className={styles.empty}>Adicione combatentes abaixo. Sem número, rolamos 1d20.</li>}
+        {list.length === 0 && <li className={styles.empty}>Adicione combatentes abaixo: nome, valor da iniciativa e tipo.</li>}
         {list.map((r, i) => (
           <li key={r.id} className={`${styles.iniRow} ${i === turn ? styles.iniOn : ""}`} aria-current={i === turn ? "true" : undefined}>
             <input
@@ -58,11 +60,22 @@ export function InitiativePanel({ data, update, partyNames }: { data: GmData; up
         ))}
       </ol>
       <form onSubmit={add} className={styles.inlineForm}>
-        <input className="gm-in gm-in--dark" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Nome e valor (ex.: Zumbi 12)" list="gm-party-names" style={{ flex: 1 }} aria-label="Nome e valor" />
-        <datalist id="gm-party-names">{partyNames.map((n) => <option key={n} value={n} />)}</datalist>
+        <NameCombo value={draft} onChange={setDraft} options={partyNames} />
+        <input
+          className="gm-in gm-in--dark"
+          value={value}
+          onChange={(e) => setValue(e.target.value.replace(/[^\d-]/g, ""))}
+          placeholder="Valor"
+          inputMode="numeric"
+          aria-label="Valor da iniciativa"
+          style={{ width: 80, textAlign: "center" }}
+        />
         <select className="gm-in gm-in--dark" value={kind} onChange={(e) => setKind(e.target.value as InitiativeEntry["kind"])} aria-label="Tipo" style={{ width: 110 }}>
           <option>Criatura</option><option>NPC</option><option>Jogador</option>
         </select>
+        <button type="submit" className="gm-btn gm-btn--gold" style={{ minWidth: 44, padding: "0 12px" }} disabled={!draft.trim() || value.trim() === "" || value === "-"} aria-label="Adicionar à iniciativa">
+          <IconPlus size={18} />
+        </button>
       </form>
       <div style={{ display: "flex", gap: 8 }}>
         <button
@@ -79,6 +92,80 @@ export function InitiativePanel({ data, update, partyNames }: { data: GmData; up
         </button>
       </div>
     </section>
+  );
+}
+
+/** Campo de nome com sugestões (jogadores da mesa) numa lista no estilo do painel. */
+function NameCombo({ value, onChange, options }: { value: string; onChange(v: string): void; options: string[] }) {
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(-1);
+  const q = value.trim().toLowerCase();
+  const list = options.filter((o) => o.toLowerCase().includes(q) && o.toLowerCase() !== q);
+  const show = open && list.length > 0;
+
+  function pick(v: string) {
+    onChange(v);
+    setOpen(false);
+    setActive(-1);
+  }
+
+  return (
+    <div className={styles.combo}>
+      <input
+        className="gm-in gm-in--dark"
+        value={value}
+        placeholder="Nome"
+        aria-label="Nome"
+        role="combobox"
+        aria-expanded={show}
+        aria-controls="gm-ini-names"
+        aria-autocomplete="list"
+        aria-activedescendant={show && active >= 0 ? `gm-ini-name-${active}` : undefined}
+        autoComplete="off"
+        onChange={(e) => {
+          onChange(e.target.value);
+          setOpen(true);
+          setActive(-1);
+        }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+            e.preventDefault();
+            setOpen(true);
+            const d = e.key === "ArrowDown" ? 1 : -1;
+            setActive((a) => (list.length ? (a + d + list.length) % list.length : -1));
+          } else if (e.key === "Enter" && show && active >= 0) {
+            e.preventDefault(); // escolhe o nome em vez de enviar o formulário
+            pick(list[active]);
+          } else if (e.key === "Escape") {
+            setOpen(false);
+          }
+        }}
+      />
+      {show && (
+        <ul id="gm-ini-names" role="listbox" className={styles.comboList}>
+          {list.map((o, i) => (
+            <li
+              key={o}
+              id={`gm-ini-name-${i}`}
+              role="option"
+              aria-selected={i === active}
+              className={i === active ? styles.comboOn : undefined}
+              onMouseDown={(e) => {
+                e.preventDefault(); // não tira o foco do campo antes do clique
+                pick(o);
+              }}
+              onMouseEnter={() => setActive(i)}
+            >
+              <span className={styles.comboDot} />
+              {o}
+              <span className={styles.comboTag}>Jogador</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

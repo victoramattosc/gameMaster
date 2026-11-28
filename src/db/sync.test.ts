@@ -6,8 +6,9 @@ import { RxDBDevModePlugin, disableWarnings } from "rxdb/plugins/dev-mode";
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory";
 import { wrappedValidateAjvStorage } from "rxdb/plugins/validate-ajv";
 import { RxDBUpdatePlugin } from "rxdb/plugins/update";
+import { RxDBMigrationSchemaPlugin } from "rxdb/plugins/migration-schema";
 import type { GmCollections, GmDatabase } from "./database";
-import { schemas } from "./schemas";
+import { migrations, schemas } from "./schemas";
 import { applyChange, replaceScope } from "./sync";
 
 jest.mock("lib/supabase", () => ({ supabase: {} }));
@@ -18,6 +19,7 @@ if (!(globalThis as { crypto?: unknown }).crypto) (globalThis as { crypto?: unkn
 disableWarnings();
 addRxPlugin(RxDBDevModePlugin);
 addRxPlugin(RxDBUpdatePlugin);
+addRxPlugin(RxDBMigrationSchemaPlugin);
 
 let db: GmDatabase;
 let n = 0;
@@ -27,7 +29,9 @@ beforeEach(async () => {
     name: `test${++n}`,
     storage: wrappedValidateAjvStorage({ storage: getRxStorageMemory() }),
   });
-  await db.addCollections(Object.fromEntries(Object.entries(schemas).map(([k, schema]) => [k, { schema }])) as never);
+  await db.addCollections(
+    Object.fromEntries(Object.entries(schemas).map(([k, schema]) => [k, { schema, migrationStrategies: migrations[k as keyof typeof schemas] ?? {} }])) as never
+  );
 });
 afterEach(() => db.remove());
 

@@ -164,6 +164,20 @@ a:hover {
   color: $gold;
   padding: 0;
 }
+.gm-ib {
+  position: relative;
+}
+/* Bolinha de aviso no canto de um botão de ícone (ex.: itens novos no baú). */
+.gm-ib-dot {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: $alert;
+  border: 2px solid $surface;
+}
 .gm-ib--round {
   border-radius: 50%;
 }

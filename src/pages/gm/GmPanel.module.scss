@@ -99,6 +99,11 @@
     flex: 1 1 380px;
   }
 }
+// Criaturas e anotações/mapa lado a lado: cada painel com a própria altura
+// (o mapa é alto e não deve esticar o painel de criaturas).
+.rowTop {
+  align-items: flex-start;
+}
 .flexCol {
   min-width: 0;
 }
@@ -272,6 +277,58 @@
   color: $text-muted;
   font-size: 18px;
   padding: 0;
+}
+.combo {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  > input {
+    width: 100%;
+  }
+}
+.comboList {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  max-height: 240px;
+  overflow-y: auto;
+  background: $surface;
+  border: 1px solid #5a4430;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    padding: 0 10px;
+    border-radius: 8px;
+    color: $text;
+    font: 700 15px $font-ui;
+    cursor: pointer;
+  }
+}
+.comboOn {
+  background: $surface-gold;
+  color: $gold-light !important;
+}
+.comboDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #7a4fc0;
+  flex: none;
+}
+.comboTag {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 700;
+  color: $text-muted;
 }
 .inlineForm {
   display: flex;

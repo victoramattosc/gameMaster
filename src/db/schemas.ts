@@ -226,7 +226,7 @@ const chest_items: RxJsonSchema<ChestItemDoc> = {
 };
 
 const mesa_files: RxJsonSchema<MesaFileDoc> = {
-  version: 0,
+  version: 1,
   primaryKey: "id",
   type: "object",
   properties: {
@@ -238,6 +238,7 @@ const mesa_files: RxJsonSchema<MesaFileDoc> = {
     path: str,
     kind: str,
     shared: bool,
+    given_to: arr,
     meta: obj,
     created_at: isoDate,
   },
@@ -292,6 +293,14 @@ export const schemas = {
 };
 
 export type CollectionName = keyof typeof schemas;
+
+/**
+ * Migrações do cache local quando um schema sobe de versão (uma função por versão nova).
+ * Como é só cache, basta deixar o documento válido: a próxima sincronização traz o resto.
+ */
+export const migrations: Partial<Record<CollectionName, Record<number, (doc: any) => any>>> = {
+  mesa_files: { 1: (doc) => ({ ...doc, given_to: [] }) },
+};
 
 /** Mantém só os campos que o schema conhece (o Supabase pode devolver colunas extras). */
 export function pickFields<T>(name: CollectionName, row: unknown): T {

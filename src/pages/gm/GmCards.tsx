@@ -5,10 +5,10 @@ import {
   deleteChestItem,
   deleteMesaFile,
   giveChestItem,
+  giveFile,
   invitePlayer,
   inviteLink,
   removeMember,
-  shareFile,
   uploadMesaFile,
   useChest,
   useInvites,
@@ -214,7 +214,8 @@ export function MusicCard({
   );
 }
 
-const CATS: Record<string, string> = { Paranormal: "#7a4fc0", Pista: "#8a6a2e", Arma: "#b23a2c", Tesouro: "#5c7a2e", Item: "#5a4430", Mágico: "#2a8a80" };
+/** Cor da etiqueta de cada categoria de item (usada também no baú do jogador). */
+export const CATS: Record<string, string> = { Paranormal: "#7a4fc0", Pista: "#8a6a2e", Arma: "#b23a2c", Tesouro: "#5c7a2e", Item: "#5a4430", Mágico: "#2a8a80" };
 
 export function ChestCard({
   mesa,
@@ -239,7 +240,8 @@ export function ChestCard({
   const [uploading, setUploading] = useState(false);
   const players = members.filter((m) => m.role === "player");
   const nameOf = (id: string | null) => players.find((p) => p.user_id === id)?.profile?.display_name || "jogador";
-  const handouts = files.filter((f) => f.kind !== "book");
+  // Mapas ficam na ferramenta de mapa; livros, na página do livro.
+  const handouts = files.filter((f) => f.kind === "file");
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -262,7 +264,7 @@ export function ChestCard({
       const problems: string[] = [];
       for (const f of list) {
         try {
-          await uploadMesaFile(mesa.id, userId, f, f.type.startsWith("image/") ? "map" : "file");
+          await uploadMesaFile(mesa.id, userId, f, "file");
         } catch (e) {
           problems.push(errorMessage(e));
         }
@@ -331,25 +333,39 @@ export function ChestCard({
 
         {tab === "files" && (
           <>
+            <div style={{ fontSize: 13, color: "#6b5640" }}>Handouts e documentos da campanha. Entregue a um jogador e o arquivo aparece na ficha dele.</div>
             <label className={styles.drop}>
               <span style={{ fontWeight: 800, color: "#2b1f16" }}>{uploading ? "Enviando…" : "Toque para escolher arquivos"}</span>
-              Handouts, imagens, PDFs, mapas · até 50 MB cada
+              Handouts, imagens, PDFs · até 50 MB cada
               <input type="file" multiple className="gm-sr" onChange={(e) => upload(guard(e.target))} />
             </label>
-            {handouts.map((f) => (
-              <div key={f.id} className={styles.item}>
-                <span className={styles.ftype}>{f.kind === "map" ? "MAPA" : (f.mime.split("/")[1] || "ARQ").slice(0, 4).toUpperCase()}</span>
-                <span style={{ flex: 1, minWidth: 0, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis" }}>{f.name}</span>
-                <button
-                  type="button"
-                  className={`gm-btn ${styles.share} ${f.shared ? styles.shareOn : ""}`}
-                  onClick={() => shareFile(f.id, !f.shared).catch((x) => setErr(errorMessage(x)))}
-                >
-                  {f.shared ? "Visível ao grupo" : "Privado"}
-                </button>
-                <button type="button" className="gm-btn gm-del" style={{ height: 32, minWidth: 32 }} aria-label={`Apagar ${f.name}`} onClick={async () => (await confirm({ title: `Apagar “${f.name}”?`, message: "O arquivo sai do baú e de quem tinha acesso.", confirmLabel: "Apagar", danger: true })) && deleteMesaFile(f)}>✕</button>
-              </div>
-            ))}
+            {handouts.map((f) => {
+              const given = f.given_to || [];
+              const type = (f.mime.split("/")[1] || "arq").replace(/^vnd\..*|^x-/, "").slice(0, 4) || "arq";
+              return (
+                <div key={f.id} className={styles.item}>
+                  <span className={styles.cat} style={{ background: "#2b1f16" }}>{type}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 800, overflow: "hidden", textOverflow: "ellipsis" }}>{f.name}</div>
+                  </div>
+                  {given.length ? (
+                    <span style={{ fontSize: 13, fontWeight: 800, color: "#33501f" }}>Com {given.map(nameOf).join(", ")}</span>
+                  ) : (
+                    <select
+                      className="gm-in"
+                      aria-label={`Entregar ${f.name} para`}
+                      style={{ height: 36, width: 120, fontSize: 13 }}
+                      value=""
+                      onChange={(e) => e.target.value && giveFile(f.id, e.target.value).catch((x) => setErr(errorMessage(x)))}
+                    >
+                      <option value="">Entregar…</option>
+                      {players.map((p) => <option key={p.user_id} value={p.user_id}>{p.profile?.display_name}</option>)}
+                    </select>
+                  )}
+                  <button type="button" className="gm-btn gm-del" style={{ height: 32, minWidth: 32 }} aria-label={`Apagar ${f.name}`} onClick={async () => (await confirm({ title: `Apagar “${f.name}”?`, message: "O arquivo sai do baú e de quem tinha acesso.", confirmLabel: "Apagar", danger: true })) && deleteMesaFile(f)}>✕</button>
+                </div>
+              );
+            })}
           </>
         )}
       </div>

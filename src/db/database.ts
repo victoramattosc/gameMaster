@@ -2,8 +2,9 @@
 // nunca misture dados; ele é apagado no "Sair".
 import { addRxPlugin, createRxDatabase, removeRxDatabase, RxCollection, RxDatabase, RxStorage } from "rxdb/plugins/core";
 import { getRxStorageDexie } from "rxdb/plugins/storage-dexie";
+import { RxDBMigrationSchemaPlugin } from "rxdb/plugins/migration-schema";
 import { RxDBUpdatePlugin } from "rxdb/plugins/update";
-import { schemas } from "./schemas";
+import { migrations, schemas } from "./schemas";
 import type {
   CharacterDoc,
   CharacterStatusDoc,
@@ -21,6 +22,7 @@ import type {
 } from "./schemas";
 
 addRxPlugin(RxDBUpdatePlugin);
+addRxPlugin(RxDBMigrationSchemaPlugin);
 
 export type GmCollections = {
   profiles: RxCollection<ProfileDoc>;
@@ -70,7 +72,11 @@ async function create(userId: string): Promise<GmDatabase> {
   const name = dbName(userId);
   const open = async (st: RxStorage<any, any>) => {
     const db = await createRxDatabase<GmCollections>({ name, storage: st, multiInstance: true, ignoreDuplicate: isDev });
-    await db.addCollections(Object.fromEntries(Object.entries(schemas).map(([k, schema]) => [k, { schema }])) as never);
+    await db.addCollections(
+      Object.fromEntries(
+        Object.entries(schemas).map(([k, schema]) => [k, { schema, migrationStrategies: migrations[k as keyof typeof schemas] ?? {} }])
+      ) as never
+    );
     return db;
   };
   try {

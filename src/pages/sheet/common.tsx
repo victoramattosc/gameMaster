@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "auth/AuthProvider";
-import { uploadPortrait } from "data/api";
+import { deletePortrait, uploadPortrait } from "data/api";
 import { errorMessage } from "lib/supabase";
 import type { Mesa } from "lib/types";
 import { Silhouette } from "ui/Icons";
@@ -107,7 +107,24 @@ export function Portrait({ url, color, onChange }: { url?: string | null; color:
     setBusy(true);
     setErr("");
     try {
+      const old = url;
       onChange(await uploadPortrait(profile.id, f));
+      // O retrato anterior foi trocado: não precisa mais ficar no Storage.
+      void deletePortrait(profile.id, old).catch(() => undefined);
+    } catch (e) {
+      setErr(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remove() {
+    if (!profile) return;
+    setBusy(true);
+    setErr("");
+    try {
+      await deletePortrait(profile.id, url);
+      onChange(null);
     } catch (e) {
       setErr(errorMessage(e));
     } finally {
@@ -129,7 +146,7 @@ export function Portrait({ url, color, onChange }: { url?: string | null; color:
         <input type="file" accept="image/*" aria-label="Enviar retrato do personagem" className="gm-sr" onChange={(e) => pick(guard(e.target)[0])} />
       </label>
       {url && (
-        <button type="button" className="gm-btn" style={{ background: "none", color: "#8a2a1f", fontSize: 13, padding: 0 }} onClick={() => onChange(null)}>
+        <button type="button" className="gm-btn" style={{ background: "none", color: "#8a2a1f", fontSize: 13, padding: 0 }} onClick={remove} disabled={busy}>
           Remover retrato
         </button>
       )}
