@@ -1,0 +1,506 @@
+@use "../../styles/tokens" as *;
+
+.page {
+  min-height: 100vh;
+  background: $bg;
+  @include mobile {
+    padding-bottom: 84px;
+  }
+}
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 28px;
+  background: $bg-raised;
+  border-bottom: 1px solid $line;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  @include mobile {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+}
+.titleBox {
+  flex: 1 1 280px;
+  min-width: 0;
+  @include mobile {
+    flex-basis: 0;
+  }
+}
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sysBadge {
+  padding: 4px 12px;
+  border-radius: $radius-pill;
+  color: #fff7e8;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.statusLine {
+  font-size: 14px;
+  color: $text-muted;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  @include mobile {
+    font-size: 13px;
+  }
+}
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+  display: inline-block;
+}
+.headerTools {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  @include mobile {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+.playing {
+  border-color: $gold;
+  box-shadow: 0 0 0 2px rgba(224, 160, 64, 0.35);
+}
+.main {
+  padding: 24px 28px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+.mobileMain {
+  padding: 14px 14px 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: stretch;
+  > * {
+    flex: 1 1 380px;
+  }
+}
+.flexCol {
+  min-width: 0;
+}
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.groupHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.privacy {
+  font-size: 14px;
+  color: $text-muted;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.emptyParty {
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px dashed $line-strong;
+  color: $text-soft;
+}
+.partyGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  @include mobile {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+.partyCard {
+  background: $paper;
+  color: $ink;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 0 0 1px #c9b48a;
+}
+.partyCompact {
+  padding: 12px;
+  gap: 8px;
+  border-radius: 14px;
+}
+.critical {
+  box-shadow: 0 0 0 3px $alert;
+}
+.partyTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.def {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 56px;
+  flex: none;
+  background: $ink;
+  color: $paper;
+  clip-path: polygon(50% 0, 100% 15%, 100% 60%, 50% 100%, 0 60%, 0 15%);
+}
+.condRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-height: 28px;
+}
+.cond {
+  border: none;
+  font-size: 13px;
+  &:hover::after {
+    content: " ×";
+  }
+}
+.condAdd {
+  height: 26px;
+  padding: 0 8px;
+  border-radius: $radius-pill;
+  border: 1.5px dashed $paper-line;
+  background: transparent;
+  color: $ink-soft;
+  font-size: 12px;
+}
+.online {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: $ink-soft;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.condPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 12px;
+  background: $paper-light;
+  border: 1px solid $paper-border;
+  > button {
+    height: 30px;
+    padding: 0 10px;
+    border-radius: $radius-pill;
+    background: $paper-dark;
+    color: $ink;
+    font-size: 13px;
+  }
+}
+
+.panelHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.empty {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px dashed $line-strong;
+  color: $text-dim;
+  font-size: 14px;
+}
+.iniList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.iniRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: $surface;
+}
+.iniOn {
+  background: #3b2a14;
+  box-shadow: inset 0 0 0 2px $gold;
+}
+.iniVal {
+  width: 38px;
+  height: 34px;
+  border-radius: 10px;
+  background: $bg;
+  color: $gold-light;
+  border: none;
+  text-align: center;
+  font-size: 16px;
+}
+.mini {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid $line;
+  color: $text-muted;
+  font-size: 18px;
+  padding: 0;
+}
+.inlineForm {
+  display: flex;
+  gap: 8px;
+  > input,
+  > select {
+    min-width: 0;
+  }
+}
+.modes {
+  display: flex;
+  background: $surface;
+  border-radius: $radius-pill;
+  padding: 3px;
+  gap: 2px;
+  > button {
+    height: 34px;
+    padding: 0 12px;
+    border-radius: $radius-pill;
+    font-size: 13px;
+    background: transparent;
+    color: $text-soft;
+  }
+}
+.modeOn {
+  background: $gold !important;
+  color: $ink !important;
+}
+.diceGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  @include mobile {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.die {
+  height: 54px;
+  border-radius: 12px;
+  font: 800 15px $font-num;
+  background: $surface;
+  color: $text;
+  border: 1px solid $line-strong;
+}
+.dieOn {
+  background: $gold;
+  color: $ink;
+  border-color: $gold;
+}
+.diceOpts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+}
+.opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  > span {
+    font-size: 14px;
+    color: $text-muted;
+    font-weight: 700;
+  }
+  > b {
+    font-size: 20px;
+    min-width: 30px;
+    text-align: center;
+  }
+}
+.result {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: $paper;
+  color: $ink;
+}
+.total {
+  font-size: 52px;
+  line-height: 1;
+  min-width: 70px;
+  text-align: center;
+  color: $red-ink;
+  display: inline-block;
+}
+.creature {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: $surface;
+  border: 1px solid $line;
+}
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  :global(.gm-chip) {
+    height: 38px;
+    padding: 0 14px;
+    font-weight: 800;
+  }
+}
+.genOut {
+  padding: 18px;
+  border-radius: 12px;
+  background: $paper;
+  color: $ink;
+  text-align: center;
+  font: 400 28px $font-display;
+  min-height: 74px;
+}
+.genRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  > select {
+    flex: 1 1 130px;
+  }
+}
+.mapDrop {
+  position: relative;
+  flex: 1;
+  min-height: 220px;
+  border-radius: 12px;
+  border: 2px dashed $line-strong;
+  background: $surface;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: $text-muted;
+  text-align: center;
+  padding: 16px;
+  cursor: pointer;
+}
+.mapTools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.bottomNav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 8px 8px 18px;
+  background: $bg-raised;
+  border-top: 1px solid $line;
+  > button {
+    flex-direction: column;
+    gap: 3px;
+    min-height: 52px;
+    border-radius: 12px;
+    background: transparent;
+    color: $text-muted;
+    font-size: 12px;
+  }
+}
+.navOn {
+  background: $surface-gold !important;
+  color: $gold-light !important;
+}
+.player {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  width: min(360px, calc(100% - 32px));
+  z-index: 30;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  iframe {
+    display: block;
+  }
+  @include mobile {
+    bottom: 92px;
+  }
+}
+
+.live {
+  display: inline-flex;
+  align-items: stretch;
+  height: 44px;
+  border-radius: $radius-sm;
+  border: 1px solid $gold;
+  overflow: hidden;
+  > button {
+    padding: 0 14px;
+    background: transparent;
+    color: $gold-light;
+    font-size: 15px;
+    border-left: 1px solid $line-gold;
+    flex: 1;
+  }
+}
+.clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  background: $surface-gold;
+  color: $paper;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+.liveDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: $online;
+  animation: gm-pulse-dot 1.6s ease-in-out infinite;
+}
+@keyframes gm-pulse-dot {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(124, 196, 106, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(124, 196, 106, 0);
+  }
+}

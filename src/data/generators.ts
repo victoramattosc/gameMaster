@@ -1,4 +1,6 @@
-import { Gender, ItemCategoryKey, RaceKey, WidgetType } from "../state/types";
+export type RaceKey = "humano" | "elfo" | "anao" | "orc" | "halfling" | "tiefling" | "generico";
+export type Gender = "m" | "f";
+export type ItemCategoryKey = "armas" | "armaduras" | "pocoes" | "magicos" | "tesouro";
 
 interface RaceDefinition {
   label: string;
@@ -89,71 +91,6 @@ export const ITEM_CATS: Record<ItemCategoryKey, ItemCategoryDefinition> = {
     bases: ["Moedas Antigas", "Gema Lapidada", "Estatueta de Jade", "Colar de Pérolas", "Mapa Rasgado", "Selo de Cera", "Frasco Vazio", "Chave Enferrujada"],
     adjs: ["Valioso", "Misterioso", "Desgastado", "Reluzente", "Amaldiçoado", "Real", "Perdido", "Sagrado"],
   },
-};
-
-export interface ConditionPreset {
-  label: string;
-  color: string;
-}
-
-export const CONDITION_PRESETS: ConditionPreset[] = [
-  { label: "Cego", color: "#5c6bc0" },
-  { label: "Surdo", color: "#8d6e63" },
-  { label: "Envenenado", color: "#7cb342" },
-  { label: "Atordoado", color: "#fbc02d" },
-  { label: "Caído", color: "#8e24aa" },
-  { label: "Apavorado", color: "#6d4c41" },
-  { label: "Enfeitiçado", color: "#ec407a" },
-  { label: "Inconsciente", color: "#455a64" },
-];
-
-export interface DiceVisual {
-  faces: number;
-  clip: string;
-  bg: string;
-  rim: string;
-}
-
-export const DICE_FACES = [4, 6, 8, 10, 12, 20, 100] as const;
-
-export const DICE_VISUALS: Record<number, DiceVisual> = {
-  4: { faces: 4, clip: "polygon(50% 4%, 6% 96%, 94% 96%)", bg: "linear-gradient(150deg,#8fd0c1 0%,#65b8a6 45%,#1f6e5c 100%)", rim: "#12463b" },
-  6: { faces: 6, clip: "none", bg: "linear-gradient(150deg,#f0c785 0%,#d4a24c 45%,#8a611f 100%)", rim: "#5e4315" },
-  8: { faces: 8, clip: "polygon(50% 2%, 96% 50%, 50% 98%, 4% 50%)", bg: "linear-gradient(150deg,#c96b6b 0%,#8b3a3a 45%,#4a1c1c 100%)", rim: "#2e1010" },
-  10: { faces: 10, clip: "polygon(50% 2%, 92% 38%, 68% 98%, 32% 98%, 8% 38%)", bg: "linear-gradient(150deg,#8fd0c1 0%,#4a92a1 45%,#1c4a56 100%)", rim: "#0f2d34" },
-  12: { faces: 12, clip: "polygon(50% 2%, 95% 33%, 80% 98%, 20% 98%, 5% 33%)", bg: "linear-gradient(150deg,#f0c785 0%,#c98a4a 45%,#7a4a1f 100%)", rim: "#4a2c10" },
-  20: { faces: 20, clip: "polygon(25% 3%, 75% 3%, 97% 50%, 75% 97%, 25% 97%, 3% 50%)", bg: "linear-gradient(150deg,#5aa8c9 0%,#2d6073 45%,#12303a 100%)", rim: "#0a1e24" },
-  100: { faces: 100, clip: "none", bg: "linear-gradient(150deg,#c96b6b 0%,#8b3a3a 40%,#d4a24c 100%)", rim: "#4a1c1c" },
-};
-
-export const WIDGET_TYPES: WidgetType[] = [
-  "players",
-  "dice",
-  "notes",
-  "characters",
-  "nameGen",
-  "itemGen",
-  "map",
-];
-
-export const WIDGET_LABEL: Record<WidgetType, string> = {
-  players: "Ordem de Jogadores",
-  dice: "Rolagem de Dados",
-  notes: "Anotações",
-  characters: "Personagens e Criaturas",
-  nameGen: "Criador de Nomes",
-  itemGen: "Criador de Itens",
-  map: "Mapa",
-};
-
-export const WIDGET_SEAL_COLOR: Record<WidgetType, string> = {
-  players: "#d4a24c",
-  dice: "#65b8a6",
-  characters: "#8b3a3a",
-  notes: "#65b8a6",
-  nameGen: "#d4a24c",
-  itemGen: "#8b3a3a",
-  map: "#65b8a6",
 };
 
 function pick<T>(arr: readonly T[]): T {

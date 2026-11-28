@@ -1,0 +1,689 @@
+@use "../../styles/tokens" as *;
+
+.page {
+  min-height: 100vh;
+  background: $bg;
+  @include mobile {
+    padding-bottom: 84px;
+  }
+}
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  background: $bg-raised;
+  border-bottom: 1px solid $line;
+  @include mobile {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+}
+.titleBox {
+  flex: 1 1 260px;
+  min-width: 0;
+  @include mobile {
+    flex-basis: 0;
+  }
+}
+.save {
+  font-size: 12px;
+  color: $text-dim;
+  font-weight: 700;
+}
+.tools {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  @include mobile {
+    :global(.gm-btn--tool) {
+      padding: 0 10px;
+    }
+  }
+}
+.toolLabel {
+  @include mobile {
+    display: none;
+  }
+}
+.secNav {
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px;
+  overflow-x: auto;
+  background: $bg-sunken;
+  border-bottom: 1px solid $line;
+  a {
+    flex: none;
+    padding: 8px 14px;
+    border-radius: $radius-pill;
+    background: $surface;
+    border: 1px solid $line;
+    color: $text;
+    text-decoration: none;
+    font-weight: 700;
+  }
+  @include mobile {
+    display: none;
+  }
+}
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 22px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  @include mobile {
+    padding: 14px 12px 40px;
+    gap: 12px;
+  }
+}
+
+/* Mobile: só as seções do grupo da aba atual aparecem. */
+@include mobile {
+  @each $g in status, skills, items, notes {
+    .m-#{$g} [data-g]:not([data-g~="#{$g}"]) {
+      display: none !important;
+    }
+  }
+}
+
+.roll {
+  position: sticky;
+  top: 8px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: $surface-gold;
+  border: 1px solid $line-gold;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+  @include mobile {
+    position: fixed;
+    top: auto;
+    bottom: 92px;
+    left: 12px;
+    right: 12px;
+  }
+}
+.rollTotal {
+  font-size: 34px;
+  color: $gold-light;
+  min-width: 50px;
+  text-align: center;
+  display: inline-block;
+}
+.received {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #22301b;
+  border: 1px solid #4f6b3a;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  @include mobile {
+    gap: 12px;
+  }
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.gridAuto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+.gridRes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 18px;
+  @include mobile {
+    gap: 12px;
+  }
+}
+.headRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* Hexágono de atributo */
+.attrs5 {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+.attr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  > small {
+    font-size: 12px;
+    font-weight: 700;
+    color: $ink-soft;
+    text-align: center;
+  }
+}
+.hex {
+  width: 100%;
+  max-width: 76px;
+  aspect-ratio: 1 / 1.1;
+  background: $ink;
+  color: $paper;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  padding: 0;
+  b {
+    font: 800 30px $font-num;
+    line-height: 1;
+  }
+  span {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+}
+.pm {
+  display: flex;
+  gap: 4px;
+  button {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1.5px solid $paper-border-strong;
+    background: $paper-light;
+    color: $ink;
+    font-weight: 800;
+    padding: 0;
+  }
+}
+
+/* Recurso (PV/PE/SAN) */
+.resHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  h2 {
+    font: 400 22px $font-display;
+  }
+}
+.resChip {
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: $radius-pill;
+}
+.resCtl {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  > button {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: none;
+    background: $ink;
+    color: $paper;
+    font: 800 20px $font-ui;
+    flex: none;
+  }
+}
+.resVal {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  white-space: nowrap;
+  input {
+    width: 3.2ch;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font: 800 40px $font-num;
+    color: $ink;
+    padding: 0;
+  }
+  span {
+    font: 800 20px $font-num;
+    color: $ink-muted;
+  }
+}
+.calcBox {
+  height: 40px;
+  border-radius: 10px;
+  background: $paper-dark;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 800 18px $font-num;
+}
+.calcDark {
+  height: 40px;
+  border-radius: 10px;
+  background: $ink;
+  color: $paper;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 800 18px $font-num;
+}
+.shield {
+  width: 72px;
+  height: 82px;
+  flex: none;
+  background: $ink;
+  color: $paper;
+  clip-path: polygon(50% 0, 100% 14%, 100% 58%, 50% 100%, 0 58%, 0 14%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  b {
+    font: 800 32px $font-num;
+    line-height: 1;
+  }
+  span {
+    font-size: 11px;
+    font-weight: 800;
+  }
+}
+
+/* Perícias */
+.skills {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  column-gap: 24px;
+  row-gap: 4px;
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+.skill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px dashed #d0bc92;
+  > span:first-child {
+    flex: 1;
+    min-width: 0;
+    font-weight: 700;
+    font-size: 15px;
+  }
+}
+.attrTag {
+  width: 44px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--tag-ink, #5a3a8a);
+  background: var(--tag-bg, #e6dcf3);
+  border-radius: 6px;
+  padding: 3px 0;
+  flex: none;
+}
+.bonus {
+  width: 38px;
+  text-align: center;
+  font: 800 17px $font-num;
+  flex: none;
+}
+.rollBtn {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 8px;
+  border: none;
+  background: var(--sys);
+  color: #fff;
+  padding: 0;
+}
+.profDot {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--sys);
+  background: transparent;
+  padding: 0;
+  &[aria-pressed="true"] {
+    background: var(--sys);
+  }
+}
+
+/* Tabelas editáveis */
+.table {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tHead {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: $ink-soft;
+}
+.tRow {
+  display: grid;
+  gap: 8px;
+}
+.addBtn {
+  align-self: flex-start;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1.5px dashed var(--sys);
+  background: transparent;
+  color: var(--sys-ink, #{$gold-ink});
+  font-size: 14px;
+}
+.carga {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: $paper-dark;
+}
+.cargaOver {
+  background: #f3d3c9;
+  border: 1.5px solid $red;
+}
+.notes {
+  background: $paper-mid !important;
+}
+
+/* Barra inferior (mobile) */
+.bottomNav {
+  display: none;
+  @include mobile {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 8px 8px 18px;
+    background: $bg-raised;
+    border-top: 1px solid $line;
+    > button {
+      flex-direction: column;
+      gap: 3px;
+      min-height: 52px;
+      border-radius: 12px;
+      background: transparent;
+      color: $text-muted;
+      font-size: 12px;
+    }
+  }
+}
+.navOn {
+  background: $surface-gold !important;
+  color: $gold-light !important;
+}
+
+/* Retrato */
+.portrait {
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: none;
+  @include mobile {
+    width: 120px;
+  }
+}
+.portraitFrame {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px $ink, 0 0 0 5px #c9b48a;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+.portraitEmpty {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.portraitHint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 10px;
+  background: rgba(23, 18, 15, 0.72);
+  color: $paper;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* Bolinhas e espaços */
+.dots {
+  display: flex;
+  gap: 6px;
+  button {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    background: transparent;
+    padding: 0;
+    &[aria-pressed="true"] {
+      background: currentColor;
+    }
+  }
+}
+.coin {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: $ink;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 800 12px $font-num;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.25);
+  flex: none;
+}
+.pip {
+  width: 22px;
+  height: 22px;
+  margin: 4px;
+  border-radius: 5px;
+  transform: rotate(45deg);
+  border: 2px solid var(--sys);
+  background: transparent;
+  padding: 0;
+  &[aria-pressed="true"] {
+    background: var(--sys);
+  }
+}
+.tri {
+  width: 26px;
+  height: 24px;
+  border: none;
+  padding: 0;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.condList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Linha de NEX / PE por rodada / deslocamento: rótulos curtos numa linha só */
+.tight :global(.gm-lbl) {
+  white-space: nowrap;
+  letter-spacing: 0.4px;
+  font-size: 11px;
+}
+
+/* Perícias de Ordem: nome + atributo numa célula, controles em colunas fixas */
+.opSkills {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+  column-gap: 28px;
+  row-gap: 2px;
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+.opSkill {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 118px 54px 40px 34px;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px dashed #d0bc92;
+  @include mobile {
+    grid-template-columns: minmax(0, 1fr) 104px 48px 34px 34px;
+    gap: 6px;
+  }
+}
+.skName {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.2;
+  sup {
+    margin-left: 2px;
+    font-size: 11px;
+    color: var(--sys-ink, #5a3a8a);
+  }
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+}
+
+/* D&D: bolinha · nome · atributo · bônus · dado sempre nas mesmas colunas */
+.dndSkills {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  column-gap: 28px;
+  row-gap: 2px;
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+.dndSkill {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 44px 40px 34px;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px dashed #d0bc92;
+  > span:nth-child(2) {
+    font-weight: 700;
+    font-size: 15px;
+    min-width: 0;
+  }
+}
+.dndSkillGap {
+  height: 10px;
+}
+
+/* D&D: bloco de vida e defesa */
+.vitals {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  @include mobile {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.vital {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 78px;
+  padding: 8px 6px;
+  border-radius: 14px;
+  background: $paper-dark;
+  color: $ink;
+  text-align: center;
+  > b,
+  input {
+    font: 800 26px $font-num;
+  }
+  > span {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: $ink-soft;
+  }
+  input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    text-align: center;
+    color: $ink;
+    padding: 0;
+  }
+}
+.vitalDark {
+  background: $ink;
+  color: $paper;
+  > span {
+    color: $text-muted;
+  }
+  input {
+    color: $paper;
+  }
+}

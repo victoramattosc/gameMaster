@@ -1,0 +1,95 @@
+@use "../styles/tokens" as *;
+
+.scroller {
+  overflow: auto;
+  background: $bg-inset;
+  padding: 12px;
+  border-radius: 12px;
+  max-height: 70vh;
+}
+.stage {
+  position: relative;
+  margin: 0 auto;
+  user-select: none;
+  touch-action: none;
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    pointer-events: none;
+  }
+}
+.piece,
+.fog {
+  -webkit-user-select: none;
+}
+.toolMove .piece {
+  cursor: grab;
+}
+.toolPiece,
+.toolFog {
+  cursor: crosshair;
+}
+.toolErase {
+  .piece,
+  .fogEdit {
+    cursor: pointer;
+  }
+}
+.loading {
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $text-muted;
+}
+.piece {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid #fff7e8;
+  background: var(--c);
+  color: #fff7e8;
+  font: 800 15px $font-num;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+.marker {
+  border-radius: 4px;
+  width: 30px;
+  height: 30px;
+  background: $ink;
+  border-color: #e8a093;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  border-width: 0;
+  padding-top: 8px;
+  color: #e8a093;
+}
+.fog {
+  position: absolute;
+  border: none;
+  padding: 0;
+  background: rgba(43, 31, 22, 0.94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $text-muted;
+  font: 700 14px $font-ui;
+}
+.fogEdit {
+  background: rgba(43, 31, 22, 0.72);
+  outline: 2px dashed $gold;
+  outline-offset: -2px;
+}
+.fogDraft {
+  position: absolute;
+  background: rgba(43, 31, 22, 0.6);
+  outline: 2px dashed $gold;
+  pointer-events: none;
+}

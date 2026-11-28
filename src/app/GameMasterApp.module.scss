@@ -1,8 +1,0 @@
-@use "../styles/tokens" as t;
-
-.page {
-  min-height: 100vh;
-  background: t.$color-bg;
-  font-family: t.$font-ui;
-  color: t.$color-text;
-}

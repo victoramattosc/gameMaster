@@ -1,0 +1,65 @@
+@use "../../styles/tokens" as *;
+
+.body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.opt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: $paper-light;
+  border: 1.5px solid #d0bc92;
+  cursor: pointer;
+  b {
+    display: block;
+    font-weight: 800;
+  }
+  span span,
+  > span > span {
+    display: block;
+    font-size: 13px;
+    color: $ink-soft;
+  }
+}
+.mark {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 12px;
+  background: $ink;
+  color: $gold;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font: 800 13px $font-num !important;
+}
+.cover {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+}
+.fileRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: $paper-light;
+  border: 1px solid $paper-border;
+}
+.warn {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f3dfb5;
+  color: #6e4708;
+  font-size: 14px;
+  font-weight: 700;
+}

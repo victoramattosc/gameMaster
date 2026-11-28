@@ -1,46 +1,39 @@
-# Getting Started with Create React App
+# Game Master
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Mesa de RPG online para mestres e jogadores: o mestre cria a mesa e convida o grupo; cada jogador
+abre a própria ficha (D&D 5e, Ordem Paranormal, Ordem Paranormal II ou sistema personalizado) com
+cálculos automáticos, e o mestre acompanha vida, recursos e condições de todos em tempo real.
 
-## Available Scripts
+## Stack
 
-In the project directory, you can run:
+- React 18 + TypeScript (Create React App) + SCSS modules
+- Supabase: Auth (JWT), Postgres com RLS, Realtime e Storage
 
-### `npm start`
+## Configuração
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1. Crie um projeto em [supabase.com](https://supabase.com).
+2. No **SQL Editor**, rode `supabase/migrations/0001_init.sql` (tabelas, policies, funções, buckets e realtime).
+3. Em **Authentication → URL Configuration**, adicione a URL do app (ex.: `http://localhost:3000`) aos redirects.
+4. Copie `.env.example` para `.env.local` e preencha `SUPABASE_URL` e `SUPABASE_ANON_KEY`.
+5. `npm install` e `npm start`.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Estrutura
 
-### `npm test`
+```
+src/
+  app/          rotas
+  auth/         sessão e perfil (Supabase Auth)
+  data/         chamadas ao Supabase e hooks com Realtime
+  systems/      regras e cálculos de cada sistema de ficha
+  pages/        Entrar, Minhas mesas, Nova mesa, Painel do mestre, Fichas, Livro
+  components/   cards de conta, mapa
+  ui/           ícones, popovers e peças visuais
+  styles/       tokens e estilos globais
+supabase/migrations/  schema do banco
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Privacidade
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+A ficha completa (`characters`) só é legível pelo próprio jogador. O mestre vê apenas
+`character_status` (nome, vida/recursos, defesa e condições). Anotações do mestre (`gm_state`)
+e o baú são visíveis só para o mestre; arquivos só chegam aos jogadores quando compartilhados.
