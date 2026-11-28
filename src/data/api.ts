@@ -1,6 +1,6 @@
-// Camada de dados: chamadas ao Supabase + hooks com Realtime.
+// Camada de dados: leitura via banco local (RxDB, ver src/db) sincronizado com o Supabase,
+// e escritas direto no Supabase (o Realtime devolve a mudança para o banco local).
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { RealtimeChannel } from "@supabase/supabase-js";
 import { supabase } from "lib/supabase";
 import type {
   AppNotification,
@@ -17,69 +17,17 @@ import type {
   Profile,
   SystemKey,
 } from "lib/types";
-import { AnySheet, normalizeSheet, sheetStatus } from "systems";
+import { AnySheet, normalizeSheet } from "systems";
+import { now, pushCharacter, pushGmState, saveCharacterLocal, saveGmStateLocal, STALE, useScope, useScopeOne, writeStatus } from "db";
+import type { CharacterDoc, GmStateDoc } from "db";
 
 function check<T>(res: { data: T; error: unknown }): T {
   if (res.error) throw res.error;
   return res.data;
 }
 
-let channelSeq = 0;
-/** Assina mudanças de uma ou mais tabelas e chama `onChange`. */
-function subscribe(
-  name: string,
-  specs: { table: string; filter?: string }[],
-  onChange: (payload: { eventType: string; new: unknown; old: unknown; table: string }) => void
-): RealtimeChannel {
-  let ch = supabase.channel(`${name}:${++channelSeq}`);
-  specs.forEach((s) => {
-    ch = ch.on(
-      "postgres_changes" as never,
-      { event: "*", schema: "public", table: s.table, ...(s.filter ? { filter: s.filter } : {}) } as never,
-      ((p: { eventType: string; new: unknown; old: unknown; table: string }) => onChange(p)) as never
-    );
-  });
-  ch.subscribe();
-  return ch;
-}
-
-/** Busca + refaz a busca quando alguma tabela assinada muda. */
-function useLive<T>(
-  key: string | null,
-  fetcher: () => Promise<T>,
-  specs: { table: string; filter?: string }[],
-  initial: T
-) {
-  const [data, setData] = useState<T>(initial);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<unknown>(null);
-  const fetchRef = useRef(fetcher);
-  fetchRef.current = fetcher;
-
-  const reload = useCallback(async () => {
-    try {
-      const d = await fetchRef.current();
-      setData(d);
-      setError(null);
-    } catch (e) {
-      setError(e);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const specKey = JSON.stringify(specs);
-  useEffect(() => {
-    if (!key) return;
-    setLoading(true);
-    reload();
-    const ch = subscribe(key, JSON.parse(specKey), () => reload());
-    return () => {
-      supabase.removeChannel(ch);
-    };
-  }, [key, specKey, reload]);
-
-  return { data, setData, loading, error, reload };
+function one<T>(row: T | null): T[] {
+  return row ? [row] : [];
 }
 
 // ───────────────────────── Lobby ─────────────────────────
@@ -96,28 +44,51 @@ export interface PendingInvite {
 }
 
 export function useLobby(userId: string | undefined) {
-  const mesas = useLive<LobbyMesa[]>(
-    userId ? "lobby" : null,
-    async () => check(await supabase.rpc("my_mesas")) as LobbyMesa[],
-    [{ table: "mesa_members" }, { table: "mesas" }, { table: "character_status", filter: `user_id=eq.${userId}` }],
-    []
+  const mesas = useScope<LobbyMesa>(
+    userId
+      ? {
+          key: "lobby",
+          collection: "lobby_mesas",
+          selector: {},
+          sort: [{ position: "asc" }],
+          fetch: async () => check(await supabase.rpc("my_mesas")) as LobbyMesa[],
+          map: (r, i) => ({ ...r, position: i }),
+          // RPC com joins: qualquer mudança refaz a busca.
+          realtime: [{ table: "mesa_members" }, { table: "mesas" }, { table: "character_status", filter: `user_id=eq.${userId}` }],
+          staleMs: STALE.short,
+        }
+      : null
   );
-  const invites = useLive<PendingInvite[]>(
-    userId ? "lobby-invites" : null,
-    async () => check(await supabase.rpc("my_invites")) as PendingInvite[],
-    [{ table: "invites", filter: `invitee_id=eq.${userId}` }],
-    []
+  const invites = useScope<PendingInvite>(
+    userId
+      ? {
+          key: "lobby-invites",
+          collection: "pending_invites",
+          selector: {},
+          sort: [{ position: "asc" }],
+          fetch: async () => check(await supabase.rpc("my_invites")) as PendingInvite[],
+          map: (r, i) => ({ ...r, position: i }),
+          realtime: [{ table: "invites", filter: `invitee_id=eq.${userId}` }],
+          staleMs: STALE.short,
+        }
+      : null
   );
   return { mesas, invites };
 }
 
 /** Status das minhas fichas (para o card "Mesas em que eu jogo"). */
 export function useMyStatuses(userId: string | undefined) {
-  return useLive<CharacterStatus[]>(
-    userId ? "my-status" : null,
-    async () => check(await supabase.from("character_status").select("*").eq("user_id", userId)) as CharacterStatus[],
-    [{ table: "character_status", filter: `user_id=eq.${userId}` }],
-    []
+  return useScope<CharacterStatus>(
+    userId
+      ? {
+          key: "my-status",
+          collection: "character_status",
+          selector: { user_id: userId },
+          fetch: async () => check(await supabase.from("character_status").select("*").eq("user_id", userId)) as CharacterStatus[],
+          realtime: [{ table: "character_status", filter: `user_id=eq.${userId}`, apply: "character_status" }],
+          staleMs: STALE.short,
+        }
+      : null
   );
 }
 
@@ -150,20 +121,34 @@ export async function respondInvite(id: string, accept: boolean): Promise<string
 // ───────────────────────── Mesa ─────────────────────────
 
 export function useMesa(mesaId: string | undefined) {
-  const mesa = useLive<Mesa | null>(
-    mesaId ? `mesa-${mesaId}` : null,
-    async () => check(await supabase.from("mesas").select("*").eq("id", mesaId).maybeSingle()) as Mesa | null,
-    [{ table: "mesas", filter: `id=eq.${mesaId}` }],
-    null
+  const mesa = useScopeOne<Mesa>(
+    mesaId
+      ? {
+          key: `mesa:${mesaId}`,
+          collection: "mesas",
+          selector: { id: mesaId },
+          fetch: async () => one(check(await supabase.from("mesas").select("*").eq("id", mesaId).maybeSingle()) as Mesa | null),
+          realtime: [{ table: "mesas", filter: `id=eq.${mesaId}`, apply: "mesas" }],
+          staleMs: STALE.medium,
+        }
+      : null
   );
-  const members = useLive<Member[]>(
-    mesaId ? `members-${mesaId}` : null,
-    async () =>
-      check(
-        await supabase.from("mesa_members").select("*, profile:profiles(*)").eq("mesa_id", mesaId).order("joined_at")
-      ) as Member[],
-    [{ table: "mesa_members", filter: `mesa_id=eq.${mesaId}` }],
-    []
+  const members = useScope<Member>(
+    mesaId
+      ? {
+          key: `members:${mesaId}`,
+          collection: "members",
+          selector: { mesa_id: mesaId },
+          sort: [{ joined_at: "asc" }],
+          fetch: async () =>
+            check(
+              await supabase.from("mesa_members").select("*, profile:profiles(*)").eq("mesa_id", mesaId).order("joined_at")
+            ) as Member[],
+          // O join com o perfil não vem no evento: refaz a busca.
+          realtime: [{ table: "mesa_members", filter: `mesa_id=eq.${mesaId}` }],
+          staleMs: STALE.medium,
+        }
+      : null
   );
   return { mesa, members };
 }
@@ -185,14 +170,21 @@ export async function removeMember(mesaId: string, userId: string) {
 }
 
 export function useInvites(mesaId: string | undefined, enabled: boolean) {
-  return useLive<Invite[]>(
-    mesaId && enabled ? `invites-${mesaId}` : null,
-    async () =>
-      check(
-        await supabase.from("invites").select("*").eq("mesa_id", mesaId).eq("status", "pending").order("created_at")
-      ) as Invite[],
-    [{ table: "invites", filter: `mesa_id=eq.${mesaId}` }],
-    []
+  return useScope<Invite>(
+    mesaId && enabled
+      ? {
+          key: `invites:${mesaId}`,
+          collection: "invites",
+          selector: { mesa_id: mesaId, status: "pending" },
+          sort: [{ created_at: "asc" }],
+          fetch: async () =>
+            check(
+              await supabase.from("invites").select("*").eq("mesa_id", mesaId).eq("status", "pending").order("created_at")
+            ) as Invite[],
+          realtime: [{ table: "invites", filter: `mesa_id=eq.${mesaId}`, apply: "invites" }],
+          staleMs: STALE.short,
+        }
+      : null
   );
 }
 
@@ -211,11 +203,17 @@ export function inviteLink(code: string) {
 // ───────────────────────── Status e presença ─────────────────────────
 
 export function useStatuses(mesaId: string | undefined) {
-  return useLive<CharacterStatus[]>(
-    mesaId ? `status-${mesaId}` : null,
-    async () => check(await supabase.from("character_status").select("*").eq("mesa_id", mesaId)) as CharacterStatus[],
-    [{ table: "character_status", filter: `mesa_id=eq.${mesaId}` }],
-    []
+  return useScope<CharacterStatus>(
+    mesaId
+      ? {
+          key: `status:${mesaId}`,
+          collection: "character_status",
+          selector: { mesa_id: mesaId },
+          fetch: async () => check(await supabase.from("character_status").select("*").eq("mesa_id", mesaId)) as CharacterStatus[],
+          realtime: [{ table: "character_status", filter: `mesa_id=eq.${mesaId}`, apply: "character_status" }],
+          staleMs: STALE.live,
+        }
+      : null
   );
 }
 
@@ -244,44 +242,53 @@ export function usePresence(mesaId: string | undefined, userId: string | undefin
 
 // ───────────────────────── Mestre ─────────────────────────
 
+/**
+ * Anotações do mestre: editadas na tela, gravadas no aparelho e enviadas ao servidor
+ * (funciona offline; sobe quando a conexão volta).
+ */
 export function useGmState(mesaId: string | undefined, enabled: boolean) {
+  const scope = useScopeOne<GmStateDoc>(
+    mesaId && enabled
+      ? {
+          key: `gm:${mesaId}`,
+          collection: "gm_state",
+          selector: { mesa_id: mesaId },
+          fetch: async () => one(check(await supabase.from("gm_state").select("*").eq("mesa_id", mesaId).maybeSingle())),
+          realtime: [{ table: "gm_state", filter: `mesa_id=eq.${mesaId}`, apply: "gm_state" }],
+          staleMs: STALE.long,
+        }
+      : null
+  );
   const [data, setDataState] = useState<GmData>({});
-  const [loading, setLoading] = useState(true);
   const timer = useRef<number | undefined>(undefined);
   const pending = useRef<GmData | null>(null);
-  const lastWrite = useRef(0);
+  /** `updated_at` da versão que está na tela. */
+  const version = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!mesaId || !enabled) return;
-    let alive = true;
-    supabase
-      .from("gm_state")
-      .select("data")
-      .eq("mesa_id", mesaId)
-      .maybeSingle()
-      .then(({ data: row }) => {
-        if (!alive) return;
-        setDataState(((row?.data as GmData) || {}) as GmData);
-        setLoading(false);
-      });
-    const ch = subscribe(`gm-${mesaId}`, [{ table: "gm_state", filter: `mesa_id=eq.${mesaId}` }], (p) => {
-      // Ignora o eco das próprias gravações; aplica alterações vindas de outro dispositivo.
-      if (Date.now() - lastWrite.current < 1500 || pending.current) return;
-      const row = p.new as { data?: GmData };
-      if (row?.data) setDataState(row.data);
-    });
-    return () => {
-      alive = false;
-      supabase.removeChannel(ch);
-    };
-  }, [mesaId, enabled]);
+    version.current = null;
+    pending.current = null;
+    setDataState({});
+  }, [mesaId]);
+
+  // Versão nova no banco local (outro dispositivo/aba): aplica se não houver edição em andamento.
+  const doc = scope.data;
+  useEffect(() => {
+    if (!doc || pending.current || doc.updated_at === version.current) return;
+    version.current = doc.updated_at;
+    setDataState((doc.data as GmData) || {});
+    if (doc.dirty) void pushGmState(doc.mesa_id);
+  }, [doc]);
 
   const flush = useCallback(async () => {
+    window.clearTimeout(timer.current);
     if (!mesaId || !pending.current) return;
     const d = pending.current;
     pending.current = null;
-    lastWrite.current = Date.now();
-    await supabase.from("gm_state").upsert({ mesa_id: mesaId, data: d, updated_at: new Date().toISOString() });
+    const ts = now();
+    version.current = ts;
+    await saveGmStateLocal(mesaId, d, ts);
+    await pushGmState(mesaId);
   }, [mesaId]);
 
   useEffect(() => () => void flush(), [flush]);
@@ -299,15 +306,22 @@ export function useGmState(mesaId: string | undefined, enabled: boolean) {
     [flush]
   );
 
-  return { data, update, loading };
+  return { data, update, loading: scope.loading };
 }
 
 export function useChest(mesaId: string | undefined, enabled: boolean) {
-  return useLive<ChestItem[]>(
-    mesaId && enabled ? `chest-${mesaId}` : null,
-    async () => check(await supabase.from("chest_items").select("*").eq("mesa_id", mesaId).order("created_at")) as ChestItem[],
-    [{ table: "chest_items", filter: `mesa_id=eq.${mesaId}` }],
-    []
+  return useScope<ChestItem>(
+    mesaId && enabled
+      ? {
+          key: `chest:${mesaId}`,
+          collection: "chest_items",
+          selector: { mesa_id: mesaId },
+          sort: [{ created_at: "asc" }],
+          fetch: async () => check(await supabase.from("chest_items").select("*").eq("mesa_id", mesaId).order("created_at")) as ChestItem[],
+          realtime: [{ table: "chest_items", filter: `mesa_id=eq.${mesaId}`, apply: "chest_items" }],
+          staleMs: STALE.long,
+        }
+      : null
   );
 }
 
@@ -323,14 +337,20 @@ export async function giveChestItem(id: string, userId: string) {
 
 /** Itens do baú entregues a mim nesta mesa. */
 export function useReceivedItems(mesaId: string | undefined, userId: string | undefined) {
-  return useLive<ChestItem[]>(
-    mesaId && userId ? `received-${mesaId}` : null,
-    async () =>
-      check(
-        await supabase.from("chest_items").select("*").eq("mesa_id", mesaId).eq("given_to", userId).eq("claimed", false)
-      ) as ChestItem[],
-    [{ table: "chest_items", filter: `given_to=eq.${userId}` }],
-    []
+  return useScope<ChestItem>(
+    mesaId && userId
+      ? {
+          key: `received:${mesaId}`,
+          collection: "chest_items",
+          selector: { mesa_id: mesaId, given_to: userId, claimed: false },
+          fetch: async () =>
+            check(
+              await supabase.from("chest_items").select("*").eq("mesa_id", mesaId).eq("given_to", userId).eq("claimed", false)
+            ) as ChestItem[],
+          realtime: [{ table: "chest_items", filter: `given_to=eq.${userId}`, apply: "chest_items" }],
+          staleMs: STALE.medium,
+        }
+      : null
   );
 }
 export async function claimItem(id: string) {
@@ -340,11 +360,18 @@ export async function claimItem(id: string) {
 // ───────────────────────── Arquivos ─────────────────────────
 
 export function useFiles(mesaId: string | undefined) {
-  return useLive<MesaFile[]>(
-    mesaId ? `files-${mesaId}` : null,
-    async () => check(await supabase.from("mesa_files").select("*").eq("mesa_id", mesaId).order("created_at")) as MesaFile[],
-    [{ table: "mesa_files", filter: `mesa_id=eq.${mesaId}` }],
-    []
+  return useScope<MesaFile>(
+    mesaId
+      ? {
+          key: `files:${mesaId}`,
+          collection: "mesa_files",
+          selector: { mesa_id: mesaId },
+          sort: [{ created_at: "asc" }],
+          fetch: async () => check(await supabase.from("mesa_files").select("*").eq("mesa_id", mesaId).order("created_at")) as MesaFile[],
+          realtime: [{ table: "mesa_files", filter: `mesa_id=eq.${mesaId}`, apply: "mesa_files" }],
+          staleMs: STALE.long,
+        }
+      : null
   );
 }
 
@@ -428,14 +455,22 @@ export async function uploadPortrait(userId: string, file: File): Promise<string
 // ───────────────────────── Notificações ─────────────────────────
 
 export function useNotifications(userId: string | undefined) {
-  const live = useLive<AppNotification[]>(
-    userId ? "notifications" : null,
-    async () =>
-      check(
-        await supabase.from("notifications").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(40)
-      ) as AppNotification[],
-    [{ table: "notifications", filter: `user_id=eq.${userId}` }],
-    []
+  const live = useScope<AppNotification>(
+    userId
+      ? {
+          key: "notifications",
+          collection: "notifications",
+          selector: { user_id: userId },
+          sort: [{ created_at: "desc" }],
+          limit: 40,
+          fetch: async () =>
+            check(
+              await supabase.from("notifications").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(40)
+            ) as AppNotification[],
+          realtime: [{ table: "notifications", filter: `user_id=eq.${userId}`, apply: "notifications" }],
+          staleMs: STALE.short,
+        }
+      : null
   );
   const unread = useMemo(() => live.data.filter((x) => !x.read).length, [live.data]);
   return { ...live, unread };
@@ -461,97 +496,141 @@ export async function myOtherCharacters(system: SystemKey, excludeMesa: string):
   return check(await supabase.rpc("my_other_characters", { p_system: system, p_exclude: excludeMesa })) as OtherCharacter[];
 }
 
+export type SaveState = "idle" | "saving" | "saved" | "offline" | "error";
+
+/** Fichas criadas nesta sessão que ainda podem não ter chegado ao banco local. */
+const creatingIds = new Map<string, string>();
+
 /**
- * Carrega (ou cria) a ficha do usuário nesta mesa e grava automaticamente,
- * mantendo `character_status` (o que o mestre vê) em sincronia.
+ * Carrega (ou cria) a ficha do usuário nesta mesa e grava automaticamente: primeiro no
+ * aparelho (funciona offline), depois no servidor, mantendo `character_status`
+ * (o que o mestre vê) em sincronia.
  */
 export function useMyCharacter<S extends AnySheet>(mesa: Mesa | null, profile: Profile | null) {
-  const [sheet, setSheet] = useState<S | null>(null);
-  const [characterId, setCharacterId] = useState<string | null>(null);
-  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
-  const timer = useRef<number | undefined>(undefined);
-  const latest = useRef<S | null>(null);
-  const charIdRef = useRef<string | null>(null);
-
   const mesaId = mesa?.id;
   const system = mesa?.system;
   const userId = profile?.id;
 
-  useEffect(() => {
-    if (!mesa || !profile) return;
-    let alive = true;
-    (async () => {
-      const { data: existing } = await supabase
-        .from("characters")
-        .select("*")
-        .eq("mesa_id", mesa.id)
-        .eq("user_id", profile.id)
-        .maybeSingle();
-      let row = existing as { id: string; sheet: unknown } | null;
-      if (!row) {
-        const fresh = normalizeSheet<S>(mesa.system, {}, profile.display_name, mesa.custom_schema);
-        const ins = await supabase
-          .from("characters")
-          .insert({ mesa_id: mesa.id, user_id: profile.id, sheet: fresh })
-          .select()
-          .single();
-        if (ins.error) {
-          setSaveState("error");
-          return;
+  const scope = useScopeOne<CharacterDoc>(
+    mesaId && userId
+      ? {
+          key: `character:${mesaId}`,
+          collection: "characters",
+          selector: { mesa_id: mesaId, user_id: userId },
+          fetch: async () =>
+            one(check(await supabase.from("characters").select("*").eq("mesa_id", mesaId).eq("user_id", userId).maybeSingle())),
+          // A tabela de fichas não está no Realtime: revalida pelo prazo.
+          realtime: [],
+          staleMs: STALE.medium,
         }
-        row = ins.data as { id: string; sheet: unknown };
-      }
-      if (!alive || !row) return;
-      const s = normalizeSheet<S>(mesa.system, row.sheet, profile.display_name, mesa.custom_schema);
-      charIdRef.current = row.id;
-      setCharacterId(row.id);
-      latest.current = s;
-      setSheet(s);
-      await writeStatus(row.id, mesa, profile, s);
-    })();
-    return () => {
-      alive = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mesaId, userId]);
+      : null
+  );
 
-  // Condições aplicadas pelo mestre chegam pelo status.
-  useEffect(() => {
-    if (!characterId) return;
-    const ch = subscribe(`mystatus-${characterId}`, [{ table: "character_status", filter: `character_id=eq.${characterId}` }], (p) => {
-      const row = p.new as CharacterStatus | undefined;
-      if (!row || !latest.current) return;
-      const cur = latest.current.conditions || [];
-      if (JSON.stringify(cur) !== JSON.stringify(row.conditions || [])) {
-        const next = { ...latest.current, conditions: row.conditions || [] } as S;
-        latest.current = next;
-        setSheet(next);
-        persist(next, false);
-      }
-    });
-    return () => {
-      supabase.removeChannel(ch);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [characterId]);
+  const [sheet, setSheet] = useState<S | null>(null);
+  const [characterId, setCharacterId] = useState<string | null>(null);
+  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const timer = useRef<number | undefined>(undefined);
+  /** Versão editada esperando o debounce para ser gravada. */
+  const pending = useRef<S | null>(null);
+  const latest = useRef<S | null>(null);
+  const charIdRef = useRef<string | null>(null);
+  /** `updated_at` da versão que está na tela. */
+  const version = useRef<string | null>(null);
+  const ctx = useRef({ mesa, profile });
+  ctx.current = { mesa, profile };
+
+  const save = useCallback(async () => {
+    window.clearTimeout(timer.current);
+    const next = pending.current;
+    const id = charIdRef.current;
+    const { mesa, profile } = ctx.current;
+    pending.current = null;
+    if (!next || !id || !mesa || !profile) return;
+    const ts = now();
+    version.current = ts;
+    await saveCharacterLocal({ id, mesa_id: mesa.id, user_id: profile.id, sheet: next, updated_at: ts });
+    const ok = await pushCharacter(id);
+    setSaveState(ok ? "saved" : navigator.onLine ? "error" : "offline");
+  }, []);
 
   const persist = useCallback(
-    (next: S, withStatus = true) => {
-      window.clearTimeout(timer.current);
+    (next: S) => {
+      pending.current = next;
       setSaveState("saving");
-      timer.current = window.setTimeout(async () => {
-        const id = charIdRef.current;
-        if (!id || !mesa || !profile) return;
-        const { error } = await supabase
-          .from("characters")
-          .update({ sheet: next, updated_at: new Date().toISOString() })
-          .eq("id", id);
-        if (!error && withStatus) await writeStatus(id, mesa, profile, next);
-        setSaveState(error ? "error" : "saved");
-      }, 700);
+      window.clearTimeout(timer.current);
+      timer.current = window.setTimeout(save, 700);
     },
-    [mesa, profile]
+    [save]
   );
+
+  // Trocou de mesa/usuário (ou saiu da tela): grava o pendente e zera o estado.
+  useEffect(
+    () => () => {
+      void save();
+      setSheet(null);
+      setCharacterId(null);
+      latest.current = null;
+      charIdRef.current = null;
+      version.current = null;
+    },
+    [save, mesaId, userId]
+  );
+
+  // Ficha do banco local → tela.
+  const doc = scope.data;
+  const scopeLoading = scope.loading;
+  useEffect(() => {
+    const { mesa, profile } = ctx.current;
+    if (!mesa || !profile || scopeLoading || pending.current) return;
+    if (!doc) {
+      if (charIdRef.current) return; // já criada, esperando o banco local
+      // Primeira vez nesta mesa: cria a ficha no aparelho e envia.
+      const fresh = normalizeSheet<S>(mesa.system, {}, profile.display_name, mesa.custom_schema);
+      const k = `${mesa.id}:${profile.id}`;
+      const newId = creatingIds.get(k) ?? crypto.randomUUID();
+      creatingIds.set(k, newId); // StrictMode roda o efeito duas vezes: mesma ficha, mesmo id
+      charIdRef.current = newId;
+      setCharacterId(charIdRef.current);
+      latest.current = fresh;
+      setSheet(fresh);
+      pending.current = fresh;
+      void save();
+      return;
+    }
+    if (doc.updated_at === version.current) return;
+    version.current = doc.updated_at;
+    const s = normalizeSheet<S>(mesa.system, doc.sheet, profile.display_name, mesa.custom_schema);
+    charIdRef.current = doc.id;
+    setCharacterId(doc.id);
+    latest.current = s;
+    setSheet(s);
+    if (doc.dirty) void pushCharacter(doc.id).then((ok) => setSaveState(ok ? "saved" : "offline"));
+    else void writeStatus(doc.id, mesa, profile, s).catch(() => undefined);
+  }, [doc, scopeLoading, save]);
+
+  // Condições aplicadas pelo mestre chegam pelo status.
+  const status = useScopeOne<CharacterStatus>(
+    characterId
+      ? {
+          key: `mystatus:${characterId}`,
+          collection: "character_status",
+          selector: { character_id: characterId },
+          fetch: async () => check(await supabase.from("character_status").select("*").eq("character_id", characterId)) as CharacterStatus[],
+          realtime: [{ table: "character_status", filter: `character_id=eq.${characterId}`, apply: "character_status" }],
+          staleMs: STALE.live,
+        }
+      : null
+  );
+  const remoteConditions = status.data?.conditions;
+  useEffect(() => {
+    if (!remoteConditions || !latest.current || pending.current) return;
+    const cur = latest.current.conditions || [];
+    if (JSON.stringify(cur) === JSON.stringify(remoteConditions)) return;
+    const next = { ...latest.current, conditions: remoteConditions } as S;
+    latest.current = next;
+    setSheet(next);
+    persist(next);
+  }, [remoteConditions, persist]);
 
   const update = useCallback(
     (fn: (s: S) => S) => {
@@ -567,36 +646,15 @@ export function useMyCharacter<S extends AnySheet>(mesa: Mesa | null, profile: P
 
   const replace = useCallback(
     (raw: unknown) => {
+      const { mesa, profile } = ctx.current;
       if (!mesa || !profile) return;
       const next = normalizeSheet<S>(mesa.system, raw, profile.display_name, mesa.custom_schema);
       latest.current = next;
       setSheet(next);
       persist(next);
     },
-    [mesa, profile, persist]
+    [persist]
   );
 
   return { sheet, update, replace, characterId, saveState, system };
-}
-
-async function writeStatus(characterId: string, mesa: Mesa, profile: Profile, sheet: AnySheet) {
-  const st = sheetStatus(mesa.system, sheet);
-  if (!mesa.show_status) {
-    // A mesa escolheu não mostrar vida/recursos ao mestre: só nome e condições.
-    st.resources = [];
-    st.defense = null;
-  }
-  await supabase.from("character_status").upsert({
-    character_id: characterId,
-    mesa_id: mesa.id,
-    user_id: profile.id,
-    name: st.name,
-    role_line: st.role_line,
-    color: profile.color,
-    portrait_url: st.portrait,
-    defense: st.defense,
-    resources: st.resources,
-    conditions: st.conditions,
-    updated_at: new Date().toISOString(),
-  });
 }

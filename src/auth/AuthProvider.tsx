@@ -2,6 +2,16 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "lib/supabase";
 import type { Profile } from "lib/types";
+import { flushOutbox, getDb, startLocalData, stopLocalData } from "db";
+
+async function cacheProfile(p: Profile) {
+  try {
+    const db = await getDb();
+    await db.profiles.upsert(p);
+  } catch {
+    /* sem banco local: segue só online */
+  }
+}
 
 interface AuthValue {
   loading: boolean;
@@ -22,13 +32,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  /** Mostra o perfil guardado no aparelho na hora e confere com o servidor em seguida. */
   const loadProfile = useCallback(async (uid: string | undefined) => {
     if (!uid) {
       setProfile(null);
+      void stopLocalData();
       return;
     }
-    const { data } = await supabase.from("profiles").select("*").eq("id", uid).maybeSingle();
-    setProfile((data as Profile) ?? null);
+    let cached: Profile | null = null;
+    try {
+      await startLocalData(uid);
+      const doc = await (await getDb()).profiles.findOne(uid).exec();
+      cached = doc ? (doc.toJSON() as Profile) : null;
+      if (cached) setProfile(cached);
+    } catch (e) {
+      console.warn("[db] banco local indisponível", e);
+    }
+    const fromServer = supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", uid)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (error) return; // offline: fica o do aparelho
+        setProfile((data as Profile) ?? null);
+        if (data) void cacheProfile(data as Profile);
+      });
+    if (!cached) await fromServer;
   }, []);
 
   useEffect(() => {
@@ -73,6 +103,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { needsConfirmation: !data.session };
       },
       async signOut() {
+        // Envia o que ficou pendente e apaga os dados deste usuário do aparelho.
+        await flushOutbox().catch(() => undefined);
+        await stopLocalData(true);
         await supabase.auth.signOut();
         setProfile(null);
       },
@@ -86,6 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .single();
         if (error) throw error;
         setProfile(data as Profile);
+        void cacheProfile(data as Profile);
       },
       async refreshProfile() {
         await loadProfile(session?.user.id);

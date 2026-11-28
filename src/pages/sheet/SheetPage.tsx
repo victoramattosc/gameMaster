@@ -59,7 +59,7 @@ export function SheetPage({ mesa }: { mesa: Mesa }) {
           <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
             <span className="gm-display" style={{ fontSize: 26, lineHeight: 1.1 }}>{sys.sheetTitle}</span>
             <span className={styles.save} aria-live="polite">
-              {ch.saveState === "saving" ? "salvando…" : ch.saveState === "saved" ? "salvo" : ch.saveState === "error" ? "erro ao salvar" : ""}
+              {ch.saveState === "saving" ? "salvando…" : ch.saveState === "saved" ? "salvo" : ch.saveState === "offline" ? "salvo no aparelho (sem internet)" : ch.saveState === "error" ? "erro ao salvar" : ""}
             </span>
           </div>
         </div>

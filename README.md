@@ -23,7 +23,8 @@ cálculos automáticos, e o mestre acompanha vida, recursos e condições de tod
 src/
   app/          rotas
   auth/         sessão e perfil (Supabase Auth)
-  data/         chamadas ao Supabase e hooks com Realtime
+  data/         chamadas ao Supabase e hooks de dados
+  db/           banco local (RxDB/IndexedDB): cache offline, sync com Realtime e fila de envio
   systems/      regras e cálculos de cada sistema de ficha
   pages/        Entrar, Minhas mesas, Nova mesa, Painel do mestre, Fichas, Livro
   components/   cards de conta, mapa
@@ -31,6 +32,18 @@ src/
   styles/       tokens e estilos globais
 supabase/migrations/  schema do banco
 ```
+
+## Dados offline (RxDB)
+
+As telas leem sempre do banco local (um por usuário, no IndexedDB), então abrem na hora e
+funcionam sem internet. Cada consulta é um "escopo" (`src/db/sync.ts`):
+
+- se o cache tiver mais idade que o prazo do escopo (`STALE`), busca no servidor em segundo plano;
+- enquanto a tela está aberta, o Realtime grava as mudanças direto no banco local, sem nova busca;
+- a ficha e as anotações do mestre são gravadas primeiro no aparelho e enviadas depois
+  (`src/db/outbox.ts`); sem internet, sobem sozinhas quando a conexão volta.
+
+Ao sair da conta, o banco local do usuário é apagado.
 
 ## Privacidade
 
