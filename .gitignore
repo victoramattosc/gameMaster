@@ -25,3 +25,5 @@ yarn-error.log*
 
 # variáveis locais (chaves do Supabase)
 .env
+
+/.claude

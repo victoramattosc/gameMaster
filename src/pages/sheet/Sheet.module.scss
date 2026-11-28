@@ -42,11 +42,6 @@
     }
   }
 }
-.toolLabel {
-  @include mobile {
-    display: none;
-  }
-}
 .secNav {
   display: flex;
   gap: 8px;

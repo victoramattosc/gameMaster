@@ -116,29 +116,3 @@
   text-align: center;
   cursor: pointer;
 }
-.ftype {
-  width: 44px;
-  height: 40px;
-  flex: none;
-  border-radius: 8px;
-  background: $ink;
-  color: $gold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font: 800 11px $font-num;
-}
-.share {
-  height: 34px;
-  padding: 0 10px;
-  border-radius: 8px;
-  font-size: 13px;
-  background: transparent;
-  color: $ink-soft;
-  border: 1.5px solid $paper-line;
-}
-.shareOn {
-  background: #dfe9cf;
-  color: #33501f;
-  border: 1px solid #9cb67c;
-}

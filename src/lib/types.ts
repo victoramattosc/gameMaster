@@ -122,6 +122,8 @@ export interface MesaFile {
   path: string;
   kind: "file" | "book" | "map";
   shared: boolean;
+  /** Jogadores que receberam o arquivo do mestre (além do compartilhamento com o grupo). */
+  given_to?: string[];
   meta: { pointers?: MapPointer[]; toc?: [string, number][]; pages?: number };
   created_at: string;
 }

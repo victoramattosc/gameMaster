@@ -7,7 +7,6 @@ import { timeAgo } from "ui/bits";
 /** Mapa compartilhado pelo mestre — jogadores só visualizam. */
 export function MapViewer({ maps, onClose }: { maps: MesaFile[]; onClose(): void }) {
   const [selId, setSelId] = useState<string | null>(null);
-  const [zoom, setZoom] = useState(100);
   const sel = maps.find((m) => m.id === selId) || maps[maps.length - 1];
 
   return (
@@ -27,12 +26,10 @@ export function MapViewer({ maps, onClose }: { maps: MesaFile[]; onClose(): void
         <span className="gm-badge" style={{ background: "#241b16", border: "1px solid #5a4430", color: "#f3c477", gap: 6, fontSize: 13 }}>
           <IconEye size={14} />Só visualização
         </span>
-        <button type="button" className="gm-btn gm-ib" style={{ width: 40, height: 40, color: "#f1e6cc" }} onClick={() => setZoom(Math.max(100, zoom - 25))} aria-label="Diminuir zoom">−</button>
-        <button type="button" className="gm-btn gm-ib" style={{ width: 40, height: 40, color: "#f1e6cc" }} onClick={() => setZoom(Math.min(250, zoom + 25))} aria-label="Aumentar zoom">+</button>
         <button type="button" className="gm-btn gm-x" style={{ width: 40, height: 40 }} onClick={onClose} aria-label="Fechar mapa">✕</button>
       </div>
       {sel ? (
-        <MapStage file={sel} zoom={zoom} />
+        <MapStage file={sel} />
       ) : (
         <div style={{ padding: 40, textAlign: "center", color: "#c9b48a" }}>O mestre ainda não compartilhou nenhum mapa.</div>
       )}
@@ -40,7 +37,7 @@ export function MapViewer({ maps, onClose }: { maps: MesaFile[]; onClose(): void
         <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ width: 12, height: 12, borderRadius: "50%", background: "#7a4fc0" }} />Agentes</span>
         <span style={{ display: "flex", alignItems: "center", gap: 6 }}><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M6 1l5 10H1z" fill="#e8a093" /></svg>Marcador do mestre</span>
         <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ width: 12, height: 12, background: "#2b1f16", border: "1px solid #5a4430" }} />Área ainda não revelada</span>
-        <span style={{ marginLeft: "auto" }}>Só o mestre move peças e revela áreas.</span>
+        <span style={{ marginLeft: "auto" }}>Roda do mouse: zoom · arraste para mover</span>
       </div>
     </section>
   );

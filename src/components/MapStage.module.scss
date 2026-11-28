@@ -1,17 +1,30 @@
 @use "../styles/tokens" as *;
 
-.scroller {
-  overflow: auto;
+.viewport {
+  position: relative;
+  overflow: hidden;
   background: $bg-inset;
-  padding: 12px;
   border-radius: 12px;
-  max-height: 70vh;
+  height: min(70vh, 720px);
+  min-height: 280px;
+  touch-action: none;
+  user-select: none;
+  overscroll-behavior: contain;
+}
+.pannable {
+  cursor: grab;
+}
+.panning,
+.panning * {
+  cursor: grabbing !important;
 }
 .stage {
-  position: relative;
-  margin: 0 auto;
-  user-select: none;
-  touch-action: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  transform-origin: 0 0;
+  will-change: transform;
   img {
     display: block;
     width: 100%;
@@ -19,6 +32,36 @@
     border-radius: 6px;
     pointer-events: none;
   }
+}
+.zoomBar {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 10px;
+  background: rgba(30, 23, 19, 0.88);
+  box-shadow: 0 0 0 1px #5a4430;
+  cursor: default;
+  :global(.gm-btn) {
+    width: 34px;
+    height: 34px;
+    min-height: 0;
+    padding: 0;
+    background: none;
+    color: #f1e6cc;
+    font-size: 18px;
+    font-weight: 800;
+  }
+}
+.zoomVal {
+  min-width: 48px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #c9b48a;
 }
 .piece,
 .fog {
@@ -46,7 +89,8 @@
 }
 .piece {
   position: absolute;
-  transform: translate(-50%, -50%);
+  // Peças mantêm o tamanho na tela, seja qual for o zoom.
+  transform: translate(-50%, -50%) scale(var(--inv, 1));
   width: 34px;
   height: 34px;
   border-radius: 50%;

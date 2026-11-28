@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "auth/AuthProvider";
-import { claimItem, signedUrl, useFiles, useMyCharacter, usePresence, useReceivedItems } from "data/api";
+import { claimItem, useFiles, useMyCharacter, usePresence, useReceivedItems } from "data/api";
 import type { ChestItem, Mesa } from "lib/types";
 import { AnySheet, SYSTEMS } from "systems";
 import type { DndSheet as DndS } from "systems/dnd";
@@ -19,6 +19,7 @@ import { OP_SECTIONS, OpSheet } from "./OpSheet";
 import { OP2_SECTIONS, Op2Sheet } from "./Op2Sheet";
 import { CUSTOM_SECTIONS, CustomSheet } from "./CustomSheet";
 import { ImportModal } from "./ImportModal";
+import { PlayerChestCard } from "./PlayerChest";
 import styles from "./Sheet.module.scss";
 
 type Tab = "status" | "skills" | "items" | "notes";
@@ -29,12 +30,13 @@ export function SheetPage({ mesa }: { mesa: Mesa }) {
   const files = useFiles(mesa.id);
   const received = useReceivedItems(mesa.id, profile?.id);
   usePresence(mesa.id, profile?.id); // avisa o mestre que estou conectado
-  const [modal, setModal] = useState<null | "map" | "import" | "notif">(null);
+  const [modal, setModal] = useState<null | "map" | "import" | "notif" | "chest">(null);
   const [rollRes, setRollRes] = useState<(RollResult & { k: number }) | null>(null);
   const [tab, setTab] = useState<Tab>("status");
   const sys = SYSTEMS[mesa.system];
-  const maps = files.data.filter((f) => f.kind === "map" && f.shared);
-  const handouts = files.data.filter((f) => f.kind === "file" && f.shared);
+  const mine = (f: { shared: boolean; given_to?: string[] }) => f.shared || (!!profile && !!f.given_to?.includes(profile.id));
+  const maps = files.data.filter((f) => f.kind === "map" && mine(f));
+  const handouts = files.data.filter((f) => f.kind === "file" && mine(f));
 
   if (!ch.sheet || !profile) return <Spinner label="Abrindo sua ficha…" />;
   const sheet = ch.sheet;
@@ -59,19 +61,29 @@ export function SheetPage({ mesa }: { mesa: Mesa }) {
           <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
             <span className="gm-display" style={{ fontSize: 26, lineHeight: 1.1 }}>{sys.sheetTitle}</span>
             <span className={styles.save} aria-live="polite">
-              {ch.saveState === "saving" ? "salvando…" : ch.saveState === "saved" ? "salvo" : ch.saveState === "error" ? "erro ao salvar" : ""}
+              {ch.saveState === "saving" ? "salvando…" : ch.saveState === "saved" ? "salvo" : ch.saveState === "offline" ? "salvo no aparelho (sem internet)" : ch.saveState === "error" ? "erro ao salvar" : ""}
             </span>
           </div>
         </div>
         <div className={styles.tools}>
-          <button type="button" className="gm-btn gm-btn--tool" onClick={() => setModal("map")} aria-label="Mapa">
-            <IconMap size={22} /><span className={styles.toolLabel}>Mapa{maps.length ? ` (${maps.length})` : ""}</span>
-          </button>
-          <Link to={`/mesa/${mesa.id}/livro`} className="gm-btn gm-btn--tool" aria-label="Livro de regras">
-            <IconBook size={22} /><span className={styles.toolLabel}>Livro</span>
+          <Link to={`/mesa/${mesa.id}/livro`} className="gm-btn gm-ib" aria-label="Livro de regras" title="Livro de regras">
+            <IconBook size={22} />
           </Link>
-          <button type="button" className="gm-btn gm-btn--tool" onClick={() => setModal("import")} aria-label="Importar ou exportar ficha">
-            <IconImport size={22} /><span className={styles.toolLabel}>Importar</span>
+          <button type="button" className="gm-btn gm-ib" onClick={() => setModal("map")} aria-label={maps.length ? `Mapa (${maps.length})` : "Mapa"} title="Mapa">
+            <IconMap size={22} />
+          </button>
+          <button
+            type="button"
+            className="gm-btn gm-ib"
+            onClick={() => setModal("chest")}
+            aria-label={received.data.length ? `Baú do jogador (${received.data.length} novos)` : "Baú do jogador"}
+            title="Baú do jogador"
+          >
+            <IconChest size={22} />
+            {received.data.length > 0 && <span className="gm-ib-dot" />}
+          </button>
+          <button type="button" className="gm-btn gm-ib" onClick={() => setModal("import")} aria-label="Importar ou exportar ficha" title="Importar ou exportar ficha">
+            <IconImport size={22} />
           </button>
           <BellButton onClick={() => setModal("notif")} />
         </div>
@@ -103,8 +115,6 @@ export function SheetPage({ mesa }: { mesa: Mesa }) {
           </div>
         )}
 
-        {handouts.length > 0 && <Handouts files={handouts} />}
-
         {mesa.system === "dnd" && <DndSheet sheet={sheet as DndS} update={up<DndS>} roll={roll} mesa={mesa} />}
         {mesa.system === "op" && <OpSheet sheet={sheet as OpS} update={up<OpS>} roll={roll} mesa={mesa} />}
         {mesa.system === "op2" && <Op2Sheet sheet={sheet as Op2S} update={up<Op2S>} roll={roll} mesa={mesa} />}
@@ -131,48 +141,13 @@ export function SheetPage({ mesa }: { mesa: Mesa }) {
       <Modal open={modal === "import"} onClose={() => setModal(null)} maxWidth={480}>
         <ImportModal mesa={mesa} current={sheet} playerName={profile.display_name} onImport={(s) => ch.replace(s)} onClose={() => setModal(null)} />
       </Modal>
+      <PopoverCard open={modal === "chest"} onClose={() => setModal(null)}>
+        <PlayerChestCard mesa={mesa} userId={profile.id} files={handouts} onTake={takeItem} onClose={() => setModal(null)} />
+      </PopoverCard>
       <PopoverCard open={modal === "notif"} onClose={() => setModal(null)}>
         <NotificationsCard onClose={() => setModal(null)} />
       </PopoverCard>
     </div>
-  );
-}
-
-function Handouts({ files }: { files: { id: string; name: string; path: string; mime: string }[] }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="gm-panel" data-g="notes" style={{ padding: 14 }}>
-      <button type="button" className="gm-btn" style={{ background: "none", color: "#f3c477", justifyContent: "flex-start", padding: 0 }} onClick={() => setOpen(!open)} aria-expanded={open}>
-        <IconChest size={18} /> Arquivos compartilhados pelo mestre ({files.length})
-      </button>
-      {open && (
-        <ul style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          {files.map((f) => <HandoutLink key={f.id} path={f.path} name={f.name} />)}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-function HandoutLink({ path, name }: { path: string; name: string }) {
-  const [busy, setBusy] = useState(false);
-  return (
-    <li>
-      <button
-        type="button"
-        className="gm-btn gm-btn--ghost-dark"
-        style={{ width: "100%", justifyContent: "flex-start" }}
-        disabled={busy}
-        onClick={async () => {
-          setBusy(true);
-          const url = await signedUrl(path).catch(() => null);
-          setBusy(false);
-          if (url) window.open(url, "_blank", "noopener");
-        }}
-      >
-        {name}
-      </button>
-    </li>
   );
 }
 
