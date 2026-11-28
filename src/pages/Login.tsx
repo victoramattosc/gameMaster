@@ -86,7 +86,7 @@ export function LoginPage() {
     <div className={styles.page}>
       <section className={styles.hero}>
         <div className={styles.brand}>
-          <Logo size={52} />
+          <Logo size={68} />
           <div>
             <div className={`gm-display ${styles.brandName}`}>Game Master</div>
             <div className={styles.brandTag}>A mesa inteira num só lugar</div>

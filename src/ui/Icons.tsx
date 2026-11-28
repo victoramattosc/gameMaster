@@ -1,4 +1,5 @@
 import React from "react";
+import gmLogo from "assets/gm-logo.png";
 
 type P = { size?: number; className?: string; color?: string };
 
@@ -64,15 +65,9 @@ export const IconScroll = ({ size = 22 }: P) => (
   </svg>
 );
 
+/** Brasão do Game Master (escudo, d20 e espadas). */
 export function Logo({ size = 40 }: { size?: number }) {
-  return (
-    <svg viewBox="0 0 64 64" width={size} height={size} aria-hidden="true">
-      <circle cx="32" cy="32" r="29" fill="#241b16" stroke="#e0a040" strokeWidth="2" />
-      <path d="M14 12l36 40M50 12L14 52" stroke="#c9b48a" strokeWidth="4" strokeLinecap="round" />
-      <path d="M32 14l14 5v12c0 10-6 16-14 20-8-4-14-10-14-20V19z" fill="#b23a2c" stroke="#f1e6cc" strokeWidth="2" />
-      <path d="M32 22v20M25 30h14" stroke="#f1e6cc" strokeWidth="2.4" strokeLinecap="round" />
-    </svg>
-  );
+  return <img src={gmLogo} alt="" width={size} height={size} style={{ display: "block", flex: "none", objectFit: "contain" }} />;
 }
 
 export function Silhouette({ width = 54, height = 66 }: { width?: number; height?: number }) {

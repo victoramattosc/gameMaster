@@ -6,7 +6,7 @@ export function SetupPage() {
     <div className="gm-center-screen">
       <div className="gm-sec" style={{ maxWidth: 560, textAlign: "left" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <Logo size={44} />
+          <Logo size={56} />
           <h1 className="gm-display" style={{ fontSize: 30 }}>Configure o Supabase</h1>
         </div>
         <p>O Game Master precisa de um projeto Supabase para contas, mesas e fichas em tempo real.</p>

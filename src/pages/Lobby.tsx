@@ -22,7 +22,7 @@ export function AppHeader({ children }: { children?: React.ReactNode }) {
     <>
       <header className={styles.header}>
         <Link to="/mesas" className={styles.brand}>
-          <Logo size={40} />
+          <Logo size={44} />
           <span className="gm-display">Game Master</span>
         </Link>
         <div className={styles.headerRight}>
